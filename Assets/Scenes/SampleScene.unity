@@ -681,7 +681,7 @@ GameObject:
   - component: {fileID: 813198857}
   - component: {fileID: 813198856}
   m_Layer: 0
-  m_Name: Swordsman
+  m_Name: Saber
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
