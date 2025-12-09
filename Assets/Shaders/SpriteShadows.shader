@@ -4,12 +4,19 @@
 // Based on the tutorial series: Unity 2.5D Tutorials by Allen Devs 
 // https://www.youtube.com/watch?v=flu2PNRUAso&list=PLDPG4I84qtXoVdVxS4E_O6txSCE_f_cLh
 
-Shader "Sprites/Diffuse"
+// might not even need this since urp does a good job applying material shaders to sprite anyways
+// could use this for projecting shadows when a player sprite holds a torch or etc
+
+Shader "Custom/SpriteShadow"
 {
     Properties
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
+        
+        // Controls at what alpha level the shadow disappears (0.0 to 1.0)
+        _Cutoff ("Shadow Alpha Cutoff", Range(0,1)) = 0.5
+        
         [MaterialToggle] PixelSnap ("Pixel snap", Float) = 0
         [HideInInspector] _RendererColor ("RendererColor", Color) = (1,1,1,1)
         [HideInInspector] _Flip ("Flip", Vector) = (1,1,1,1)
@@ -21,20 +28,22 @@ Shader "Sprites/Diffuse"
     {
         Tags
         {
-            "Queue"="Transparent"
+            "Queue"="AlphaTest"
             "IgnoreProjector"="True"
-            "RenderType"="Transparent"
+            "RenderType"="TransparentCutout"
             "PreviewType"="Plane"
             "CanUseSpriteAtlas"="True"
         }
 
         Cull Off
-        Lighting Off
+        Lighting On
         ZWrite Off
         Blend One OneMinusSrcAlpha
 
         CGPROGRAM
-        #pragma surface surf Lambert vertex:vert nofog nolightmap nodynlightmap keepalpha noinstancing
+        // 'addshadow' = Generate a shadow pass based on geometry
+        // 'alphatest:_Cutoff' = Use the _Cutoff property to shape that shadow
+        #pragma surface surf Lambert vertex:vert nofog nolightmap nodynlightmap keepalpha noinstancing addshadow alphatest:_Cutoff
         #pragma multi_compile_local _ PIXELSNAP_ON
         #pragma multi_compile _ ETC1_EXTERNAL_ALPHA
         #include "UnitySprites.cginc"
@@ -66,5 +75,5 @@ Shader "Sprites/Diffuse"
         ENDCG
     }
 
-Fallback "Transparent/VertexLit"
+    Fallback "Transparent/Cutout/VertexLit"
 }
