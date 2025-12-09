@@ -541,7 +541,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 600
-        y: 400
+        y: 401
         width: 100
         height: 100
       alignment: 0
@@ -760,7 +760,7 @@ TextureImporter:
       name: Swordsman_30
       rect:
         serializedVersion: 2
-        x: 900
+        x: 901
         y: 300
         width: 100
         height: 100
@@ -848,7 +848,7 @@ TextureImporter:
       name: Swordsman_34
       rect:
         serializedVersion: 2
-        x: 1300
+        x: 1301
         y: 300
         width: 100
         height: 100

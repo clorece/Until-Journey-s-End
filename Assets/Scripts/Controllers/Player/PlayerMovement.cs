@@ -7,10 +7,9 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Ground Detection")]
     public LayerMask groundLayer;
-    public float rayLength = 1.5f; // not sure if i really need this, 
-                                    // since the camera adjusts to the players position, 
-                                    // even in the y axis. so the raymarch will hit the ground anyways
-                                    // i think...
+    public float rayLength = 1.5f;
+    // offset to ensure the ray starts inside the player but checks below feet
+    public float heightOffset = 0.5f; 
 
     [Header("Dependencies")]
     public Transform cameraTransform; 
@@ -19,9 +18,10 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 inputVector;
     private Vector3 moveDirection;
 
+    public bool isMoving => inputVector.magnitude > 0.01f;
+
     void Start()
     {
-        // render sprite on start from our animation controller script
         characterSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         if (characterSpriteRenderer == null)
@@ -39,7 +39,7 @@ public class PlayerMovement : MonoBehaviour
         inputVector.x = Input.GetAxisRaw("Horizontal");
         inputVector.y = Input.GetAxisRaw("Vertical");
 
-        // flip sprite conditions to flip the sprite in the direction it is facing or walking
+        // Flip logic - Only flip if we are actually pressing a direction
         if (characterSpriteRenderer != null && inputVector.magnitude > 0)
         {
             if (inputVector.x < 0) characterSpriteRenderer.flipX = true;
@@ -54,8 +54,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (inputVector.magnitude <= 0) return;
-
+        // 1. Calculate the intended move direction (even if it is zero)
         Vector3 camForward = cameraTransform.forward;
         Vector3 camRight = cameraTransform.right;
 
@@ -65,28 +64,45 @@ public class PlayerMovement : MonoBehaviour
         camRight.Normalize();
 
         Vector3 targetMoveDir = (camForward * inputVector.y) + (camRight * inputVector.x);
-        
-        // we want to do movement using raycasts, so we can move the target along the ground layer we set
-        // so it can properly account for different y levels in terrain
-        // as well as preventing the object from moving along the literal y axis when pressing 'up' or 'w'
-        RaycastHit hit;
-        Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
 
-        Debug.DrawRay(rayOrigin, Vector3.down * rayLength, Color.red); // debug ray view
+        // instead of moving the player through raycasts to clip to the ground
+        // we want to just make sure that the player is constantly clipping to the ground
+        // in case some sprite actions want to change the y location of the object in space
+        // to the y location the action was called on
+
+        RaycastHit hit;
+        Vector3 rayOrigin = transform.position + Vector3.up * heightOffset;
+
+        Debug.DrawRay(rayOrigin, Vector3.down * rayLength, Color.red); 
 
         if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayLength, groundLayer))
         {
-            // project our flat movement vector onto the slope of the ground
-            // this tilts the vector up or down based on the ground angle
+            // tilt the movement vector to match the slope
             moveDirection = Vector3.ProjectOnPlane(targetMoveDir, hit.normal).normalized;
+
+            // if we are close to the ground, snap the Y position to the hit point
+            float targetY = hit.point.y;
+            
+            // we only snap if we are very close to avoid snapping down from a jump/cliff too hard
+            if (Mathf.Abs(transform.position.y - targetY) < 0.5f) 
+            {
+                Vector3 newPos = transform.position;
+                
+                // move position to the ground hit point
+                newPos.y = Mathf.MoveTowards(transform.position.y, targetY, 10f * Time.fixedDeltaTime);
+                transform.position = newPos;
+            }
         }
         else
         {
-            // if we are in the air, just move flat, but we shouldnt unless we move off the map
             moveDirection = targetMoveDir.normalized;
         }
 
-        transform.Translate(moveDirection * moveSpeed * Time.fixedDeltaTime, Space.World);
+        // only move if there is input, otherwise we just stand there
+        if (inputVector.magnitude > 0.01f)
+        {
+            transform.Translate(moveDirection * moveSpeed * Time.fixedDeltaTime, Space.World);
+        }
     }
 
     public bool IsMoving()
