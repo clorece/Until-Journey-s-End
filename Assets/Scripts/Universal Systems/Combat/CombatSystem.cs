@@ -22,25 +22,18 @@ public class CombatSystem : MonoBehaviour
     void Start()
     {
         myStats = GetComponent<EntityStats>();
-        
         if (attackPoint == null)
             Debug.LogError("CombatSystem: ATTACK POINT IS MISSING! Please assign it in the Inspector.");
     }
 
+    // --- CONE ATTACK (Omni-Directional) ---
     public void PerformConeAttack(float range, float angle, float knockbackForce, StatType damageType)
     {
         Vector3 origin = attackPoint.position;
         
-        // Vector3 forwardDir = attackPoint.forward; 
-        
-        Vector3 forwardDir = Vector3.right; // default Right
-        
-        if (attackPoint.forward.x < 0)
-        {
-            forwardDir = Vector3.left;
-        }
-
-        Debug.Log($"CombatSystem: Melee Snap Direction: {forwardDir}");
+        // REVERTED: Use the exact aim direction (Mouse Position)
+        // We do NOT snap to Left/Right anymore.
+        Vector3 forwardDir = attackPoint.forward; 
 
         Collider[] hits = Physics.OverlapSphere(origin, range, targetLayers);
 
@@ -49,27 +42,38 @@ public class CombatSystem : MonoBehaviour
             if (hit.gameObject == gameObject) continue; 
 
             Vector3 directionToTarget = (hit.transform.position - origin).normalized;
-
+            
+            // Flatten Y so height differences don't break aiming
+            // This ensures you can hit enemies on slopes
             Vector3 flatTargetDir = directionToTarget;
             flatTargetDir.y = 0;
             flatTargetDir.Normalize();
 
-            if (Vector3.Angle(forwardDir, flatTargetDir) < angle / 2)
+            Vector3 flatForward = forwardDir;
+            flatForward.y = 0;
+            flatForward.Normalize();
+
+            // Precise Angle Check
+            if (Vector3.Angle(flatForward, flatTargetDir) < angle / 2)
             {
                 ApplyDamage(hit.gameObject, forwardDir, knockbackForce, damageType);
             }
         }
     }
 
+    // --- LINE ATTACK (Omni-Directional) ---
     public void PerformLineAttack(float length, float width, float knockbackForce, StatType damageType)
     {
         Vector3 origin = attackPoint.position;
         
+        // Use exact aim direction
         Vector3 forwardDir = attackPoint.forward; 
 
+        // Calculate center of box based on aim
         Vector3 center = origin + (forwardDir * (length / 2));
         Vector3 halfExtents = new Vector3(width / 2, 2f, length / 2);
         
+        // Use exact aim rotation for the box orientation
         Quaternion orientation = attackPoint.rotation; 
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents, orientation, targetLayers);
@@ -81,6 +85,7 @@ public class CombatSystem : MonoBehaviour
         }
     }
 
+    // --- RADIAL ATTACK (Omni-Directional / AoE) ---
     public void PerformRadialAttack(Vector3 targetPosition, float radius, float knockbackForce, StatType damageType)
     {
         Collider[] hits = Physics.OverlapSphere(targetPosition, radius, targetLayers);
@@ -88,6 +93,8 @@ public class CombatSystem : MonoBehaviour
         foreach (Collider hit in hits)
         {
             if (hit.gameObject == gameObject) continue;
+            
+            // Knockback is radial (away from center)
             Vector3 knockbackDir = (hit.transform.position - targetPosition).normalized;
             ApplyDamage(hit.gameObject, knockbackDir, knockbackForce, damageType);
         }
@@ -103,6 +110,7 @@ public class CombatSystem : MonoBehaviour
         }
     }
 
+    // --- DEBUG GIZMOS ---
     void OnDrawGizmos()
     {
         if (!showGizmos || attackPoint == null) return;
@@ -111,41 +119,32 @@ public class CombatSystem : MonoBehaviour
         switch (debugType)
         {
             case AttackType.Cone:
-                Vector3 snapForward = (attackPoint.forward.x < 0) ? Vector3.left : Vector3.right;
-                DrawConeGizmo(snapForward);
+                // Visualize the EXACT aim direction
+                Vector3 forward = attackPoint.forward;
+                
+                Quaternion leftRayRotation = Quaternion.AngleAxis(-debugAngle / 2, Vector3.up);
+                Vector3 leftRayDirection = leftRayRotation * forward;
+                
+                Quaternion rightRayRotation = Quaternion.AngleAxis(debugAngle / 2, Vector3.up);
+                Vector3 rightRayDirection = rightRayRotation * forward;
+
+                Vector3 origin = attackPoint.position;
+                Gizmos.DrawLine(origin, origin + leftRayDirection * debugRange);
+                Gizmos.DrawLine(origin, origin + rightRayDirection * debugRange);
+                Gizmos.DrawLine(origin + leftRayDirection * debugRange, origin + forward * debugRange);
+                Gizmos.DrawLine(origin + rightRayDirection * debugRange, origin + forward * debugRange);
                 break;
                 
             case AttackType.Line:
-                DrawLineGizmo();
+                Gizmos.matrix = attackPoint.localToWorldMatrix;
+                Vector3 center = new Vector3(0, 0, debugRange / 2);
+                Vector3 size = new Vector3(debugWidth, 1f, debugRange);
+                Gizmos.DrawWireCube(center, size);
                 break;
                 
             case AttackType.Radial:
                 Gizmos.DrawWireSphere(attackPoint.position, debugRange);
                 break;
         }
-    }
-
-    private void DrawConeGizmo(Vector3 forward)
-    {
-        Vector3 origin = attackPoint.position;
-
-        Quaternion leftRayRotation = Quaternion.AngleAxis(-debugAngle / 2, Vector3.up);
-        Vector3 leftRayDirection = leftRayRotation * forward;
-        Gizmos.DrawLine(origin, origin + leftRayDirection * debugRange);
-
-        Quaternion rightRayRotation = Quaternion.AngleAxis(debugAngle / 2, Vector3.up);
-        Vector3 rightRayDirection = rightRayRotation * forward;
-        Gizmos.DrawLine(origin, origin + rightRayDirection * debugRange);
-
-        Gizmos.DrawLine(origin + leftRayDirection * debugRange, origin + forward * debugRange);
-        Gizmos.DrawLine(origin + rightRayDirection * debugRange, origin + forward * debugRange);
-    }
-
-    private void DrawLineGizmo()
-    {
-        Gizmos.matrix = attackPoint.localToWorldMatrix;
-        Vector3 center = new Vector3(0, 0, debugRange / 2);
-        Vector3 size = new Vector3(debugWidth, 1f, debugRange);
-        Gizmos.DrawWireCube(center, size);
     }
 }
