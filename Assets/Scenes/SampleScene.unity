@@ -486,7 +486,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   playerTarget: {fileID: 1376067672}
   orientationRef: {fileID: 813198855}
-  cameraDistance: 25
+  cameraDistance: 15
   smoothSpeed: 1
   pivotOffset: {x: -1, y: 1.25, z: 0}
 --- !u!1 &368717681
