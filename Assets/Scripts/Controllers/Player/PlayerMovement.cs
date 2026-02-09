@@ -6,8 +6,9 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Ground Detection")]
     public LayerMask groundLayer;
-    public float rayLength = 1.5f;
-    public float heightOffset = 0.5f; 
+    public float rayLength = 10.0f; // must match Y dead zone in CameraFollow.cs
+    public float heightOffset = 0.5f;
+    public float groundAnchorOffset = 1.0f;
 
     [Header("Dependencies")]
     public Transform cameraTransform; 
@@ -56,6 +57,27 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             HandleMovement();
+        }
+        
+        // ALWAYS clamp to ground after any movement
+        ClampToGround();
+    }
+    
+    /// <summary>
+    /// Constantly raycasts and snaps the player to the ground.
+    /// Runs every FixedUpdate regardless of movement state.
+    /// </summary>
+    private void ClampToGround()
+    {
+        RaycastHit hit;
+        // Cast from high above to catch ground even if player is below it
+        Vector3 rayOrigin = transform.position + Vector3.up * 2.0f;
+        
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayLength + 2.0f, groundLayer))
+        {
+            Vector3 newPos = transform.position;
+            newPos.y = hit.point.y + groundAnchorOffset;
+            transform.position = newPos;
         }
     }
 
