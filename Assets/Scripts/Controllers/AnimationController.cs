@@ -37,6 +37,7 @@ public class AnimationController : MonoBehaviour
 
     [Header("Dependencies")]
     public PlayerMovement playerMovement;
+    public EnemyMovement enemyMovement;
     public CombatSystem combatSystem; 
     public EntityStats myStats; 
     public KeybindManager keybinds;
@@ -57,10 +58,11 @@ public class AnimationController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         if (playerMovement == null) playerMovement = GetComponentInParent<PlayerMovement>();
+        if (enemyMovement == null) enemyMovement = GetComponentInParent<EnemyMovement>();
         if (combatSystem == null) combatSystem = GetComponentInParent<CombatSystem>();
         if (myStats == null) myStats = GetComponentInParent<EntityStats>();
 
-        // find keybinds
+        // find keybinds (only relevant for player-controlled entities)
         if (keybinds == null) keybinds = GetComponentInParent<KeybindManager>();
             
         idleClip.loop = true;
@@ -76,29 +78,35 @@ public class AnimationController : MonoBehaviour
             return; 
         }
 
-        if (playerMovement == null || keybinds == null) return;
-
-        if (Input.GetKeyDown(keybinds.basicAttack)) 
+        // Handle player input (only when this is a player-controlled entity)
+        if (playerMovement != null && keybinds != null)
         {
-            TriggerComboAttack();
-            return;
-        }
-
-        // we look at how many keys are defined in the manager
-        for (int i = 0; i < keybinds.skillKeys.Length; i++)
-        {
-            // if the user presses the key for Skill[i]...
-            if (Input.GetKeyDown(keybinds.skillKeys[i]))
+            if (Input.GetKeyDown(keybinds.basicAttack)) 
             {
-                if (i < skills.Length)
+                TriggerComboAttack();
+                return;
+            }
+
+            // we look at how many keys are defined in the manager
+            for (int i = 0; i < keybinds.skillKeys.Length; i++)
+            {
+                if (Input.GetKeyDown(keybinds.skillKeys[i]))
                 {
-                    TriggerSkill(i);
-                    return; // stop checking other keys
+                    if (i < skills.Length)
+                    {
+                        TriggerSkill(i);
+                        return;
+                    }
                 }
             }
         }
 
-        bool isMoving = playerMovement.isMoving;
+        // Read isMoving from whichever movement source exists
+        bool isMoving = false;
+        if (playerMovement != null)
+            isMoving = playerMovement.isMoving;
+        else if (enemyMovement != null)
+            isMoving = enemyMovement.isMoving;
 
         if (isMoving && currentAnimation.sprites != walkClip.sprites)
             SetAnimation(walkClip);
