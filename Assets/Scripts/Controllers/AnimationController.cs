@@ -1,5 +1,14 @@
 using UnityEngine;
 
+public enum LinkedBuff
+{
+    None,
+    Strife,         // saber class
+    Vengeance,      // swordsman class
+    Arcana,         // mage class
+    PerfectDraw     // archer class
+}
+
 [System.Serializable]
 public struct AnimationFrames
 {
@@ -20,6 +29,12 @@ public struct AnimationFrames
 
     [Header("Movement Logic")]
     public bool movesToHitbox; 
+
+    [Header("Cooldown")]
+    public float cooldown;
+
+    [Header("Buff Link")]
+    public LinkedBuff linkedBuff;
 }
 
 public class AnimationController : MonoBehaviour
@@ -44,17 +59,29 @@ public class AnimationController : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     private AnimationFrames currentAnimation;
+    public AnimationFrames CurrentAnimation => currentAnimation;
     private int currentFrameIndex;
     private float timer;
     
     private bool isAttacking;
     private int comboIndex; 
     private float lastInputTime;
+    private float[] cooldownTimer;
+    public float[] CooldownTimer => cooldownTimer;
 
     public bool IsAttacking => isAttacking;
+    public event System.Action<AnimationFrames> OnAttackStart;
+    public event System.Action<AnimationFrames> OnAttackEnd;
 
     void Start()
     {
+        // add Buffs component if missing, as it is required for Strife/etc logic
+        if (GetComponent<Buffs>() == null)
+        {
+            Debug.Log($"[AnimationController] Auto-adding missing Buffs component to {gameObject.name}");
+            gameObject.AddComponent<Buffs>();
+        }
+
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         if (playerMovement == null) playerMovement = GetComponentInParent<PlayerMovement>();
@@ -68,17 +95,24 @@ public class AnimationController : MonoBehaviour
         idleClip.loop = true;
         walkClip.loop = true;
         SetAnimation(idleClip);
+
+        cooldownTimer = new float[skills.Length];
     }
 
     void Update()
     {
+        for (int i = 0; i < cooldownTimer.Length; i++)
+        {
+            if (cooldownTimer[i] > 0)
+                cooldownTimer[i] -= Time.deltaTime;
+        }
+
         if (isAttacking)
         {
             PlayOneShotAnimation();
             return; 
         }
 
-        // Handle player input (only when this is a player-controlled entity)
         if (playerMovement != null && keybinds != null)
         {
             if (Input.GetKeyDown(keybinds.basicAttack)) 
@@ -101,7 +135,6 @@ public class AnimationController : MonoBehaviour
             }
         }
 
-        // Read isMoving from whichever movement source exists
         bool isMoving = false;
         if (playerMovement != null)
             isMoving = playerMovement.isMoving;
@@ -128,6 +161,11 @@ public class AnimationController : MonoBehaviour
     public void TriggerSkill(int index)
     {
         if (skills == null || index < 0 || index >= skills.Length) return;
+        if (cooldownTimer[index] > 0f) return; // if the skill is on cooldown, return
+
+        cooldownTimer[index] = skills[index].cooldown; // start cooldown
+        Debug.Log($"Skill {index} Cooldown Started: {skills[index].cooldown}s");
+
         ExecuteCombatMove(skills[index]);
     }
 
@@ -135,6 +173,7 @@ public class AnimationController : MonoBehaviour
     {
         isAttacking = true;
         SetAnimation(moveData);
+        OnAttackStart?.Invoke(moveData);
 
         if (combatSystem != null && moveData.isAttack)
         {
@@ -204,6 +243,7 @@ public class AnimationController : MonoBehaviour
             timer -= timePerFrame;
             if (currentFrameIndex >= currentAnimation.sprites.Length - 1)
             {
+                OnAttackEnd?.Invoke(currentAnimation);
                 isAttacking = false; 
                 SetAnimation(idleClip);
             }

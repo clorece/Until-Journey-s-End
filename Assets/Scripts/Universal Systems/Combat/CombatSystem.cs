@@ -26,13 +26,10 @@ public class CombatSystem : MonoBehaviour
             Debug.LogError("CombatSystem: ATTACK POINT IS MISSING! Please assign it in the Inspector.");
     }
 
-    // --- CONE ATTACK (Omni-Directional) ---
     public void PerformConeAttack(float range, float angle, float knockbackForce, StatType damageType)
     {
         Vector3 origin = attackPoint.position;
-        
-        // REVERTED: Use the exact aim direction (Mouse Position)
-        // We do NOT snap to Left/Right anymore.
+
         Vector3 forwardDir = attackPoint.forward; 
 
         Collider[] hits = Physics.OverlapSphere(origin, range, targetLayers);
@@ -43,8 +40,6 @@ public class CombatSystem : MonoBehaviour
 
             Vector3 directionToTarget = (hit.transform.position - origin).normalized;
             
-            // Flatten Y so height differences don't break aiming
-            // This ensures you can hit enemies on slopes
             Vector3 flatTargetDir = directionToTarget;
             flatTargetDir.y = 0;
             flatTargetDir.Normalize();
@@ -61,19 +56,15 @@ public class CombatSystem : MonoBehaviour
         }
     }
 
-    // --- LINE ATTACK (Omni-Directional) ---
     public void PerformLineAttack(float length, float width, float knockbackForce, StatType damageType)
     {
         Vector3 origin = attackPoint.position;
-        
-        // Use exact aim direction
+
         Vector3 forwardDir = attackPoint.forward; 
 
-        // Calculate center of box based on aim
         Vector3 center = origin + (forwardDir * (length / 2));
         Vector3 halfExtents = new Vector3(width / 2, 2f, length / 2);
         
-        // Use exact aim rotation for the box orientation
         Quaternion orientation = attackPoint.rotation; 
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents, orientation, targetLayers);
@@ -85,7 +76,6 @@ public class CombatSystem : MonoBehaviour
         }
     }
 
-    // --- RADIAL ATTACK (Omni-Directional / AoE) ---
     public void PerformRadialAttack(Vector3 targetPosition, float radius, float knockbackForce, StatType damageType)
     {
         Collider[] hits = Physics.OverlapSphere(targetPosition, radius, targetLayers);
@@ -94,11 +84,12 @@ public class CombatSystem : MonoBehaviour
         {
             if (hit.gameObject == gameObject) continue;
             
-            // Knockback is radial (away from center)
             Vector3 knockbackDir = (hit.transform.position - targetPosition).normalized;
             ApplyDamage(hit.gameObject, knockbackDir, knockbackForce, damageType);
         }
     }
+
+    public event System.Action<GameObject> OnTargetKilled;
 
     private void ApplyDamage(GameObject target, Vector3 knockbackDir, float force, StatType damageType)
     {
@@ -106,11 +97,16 @@ public class CombatSystem : MonoBehaviour
         if (damageable != null)
         {
             float damageToDeal = myStats.CalculateOutgoingDamage(damageType);
-            damageable.TakeDamage(damageToDeal, knockbackDir * force);
+            bool killed = damageable.TakeDamage(damageToDeal, knockbackDir * force);
+            
+            if (killed)
+            {
+                Debug.Log($"[COMBAT] ({this.GetInstanceID()}) Kill detected on {target.name}. Invoking OnTargetKilled.");
+                OnTargetKilled?.Invoke(target);
+            }
         }
     }
 
-    // --- DEBUG GIZMOS ---
     void OnDrawGizmos()
     {
         if (!showGizmos || attackPoint == null) return;

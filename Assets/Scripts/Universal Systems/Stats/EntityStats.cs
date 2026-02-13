@@ -150,7 +150,7 @@ public class EntityStats : MonoBehaviour, IDamageable
         return rawDamage;
     }
 
-    public void TakeDamage(float damageAmount, Vector3 knockbackSource)
+    public bool TakeDamage(float damageAmount, Vector3 knockbackSource)
     {
         float defense = GetStatValue(StatType.Defense);
         float finalDamage = Mathf.Max(damageAmount - defense, 0f);
@@ -158,12 +158,18 @@ public class EntityStats : MonoBehaviour, IDamageable
         currentHealth -= finalDamage;
         currentHealth = Mathf.Clamp(currentHealth, 0, GetStatValue(StatType.MaxHealth));
 
-        Debug.Log($"{gameObject.name} took {finalDamage} dmg. HP: {currentHealth}");
+        Debug.Log($"[COMBAT] {gameObject.name} took {finalDamage} damage. Remaining HP: {currentHealth}/{GetStatValue(StatType.MaxHealth)}");
         OnHealthChanged?.Invoke();
 
         OnHit?.Invoke(knockbackSource); 
 
-        if (currentHealth <= 0) Die();
+        if (currentHealth <= 0)
+        {
+            Debug.Log($"[COMBAT] {gameObject.name} DIED. Returning true.");
+            Die();
+            return true;
+        }
+        return false;
     }
     
     public void AddModifier(StatType type, float amount, float duration)
