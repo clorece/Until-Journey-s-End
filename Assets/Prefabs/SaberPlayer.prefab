@@ -1,0 +1,456 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1541835821097575116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4395602522433662714}
+  - component: {fileID: 3691093195019520285}
+  m_Layer: 0
+  m_Name: AttackPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4395602522433662714
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541835821097575116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.191, z: 0.191}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8760764934073509887}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3691093195019520285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541835821097575116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aa8729843112840ca28b79e9a31e2ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAiming
+  aimMode: 0
+  target: {fileID: 0}
+  detectionRadius: 0
+  rotationSpeed: 0
+  showDebugLine: 1
+--- !u!1 &1714348050524849091
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8760764934073509887}
+  - component: {fileID: 4835837774318956462}
+  - component: {fileID: 4834104026330866173}
+  - component: {fileID: 5856814560392142678}
+  - component: {fileID: 2961673169028449689}
+  - component: {fileID: 5889307724168727458}
+  - component: {fileID: 9089894792261962423}
+  m_Layer: 0
+  m_Name: SaberPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8760764934073509887
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -472.98117, y: -34.1077, z: 587.92065}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3406458396370480048}
+  - {fileID: 4395602522433662714}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4835837774318956462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d972d5ef2731df44a3d7ab6ce4d5044, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  rayLength: 1.5
+  heightOffset: 0.5
+  groundAnchorOffset: 1
+  cameraTransform: {fileID: 0}
+--- !u!54 &4834104026330866173
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 1
+--- !u!136 &5856814560392142678
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.4
+  m_Height: 1.5
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2961673169028449689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 326c2185784a8bf2ba1789514bb09f21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EntityStats
+  globalScalingFactor: 0.01
+  baseMaxHealth: 100
+  baseMoveSpeed: 12
+  baseDashSpeed: 36
+  baseDefense: 10
+  baseAttackSpeed: 20
+  baseSlashAttack: 23
+  basePierceAttack: 35
+  baseMagicAttack: 0
+  baseActionPoints: 50
+  baseStrength: 0
+  baseLuck: 0
+  baseFortitude: 0
+  baseAgility: 10
+  baseImagination: 0
+  baseCritRate: 10
+  baseCritDamage: 25
+--- !u!114 &5889307724168727458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70fa29fd8f78764df98afe90670ac7fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatSystem
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  attackPoint: {fileID: 4395602522433662714}
+  showGizmos: 1
+  debugType: 1
+  debugRange: 9
+  debugAngle: 90
+  debugWidth: 2
+--- !u!114 &9089894792261962423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714348050524849091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 330fefdeb04821f15b70200c6a946277, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KeybindManager
+  basicAttackKey: Mouse0
+  interactKey: F
+  jumpKey: Space
+  skillKeyStrings:
+  - Q
+  basicAttack: 323
+  interact: 102
+  jump: 32
+  skillKeys: 00000000
+--- !u!1 &3742880188894718964
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3406458396370480048}
+  - component: {fileID: 4146459299445769997}
+  - component: {fileID: 977930318301918936}
+  m_Layer: 0
+  m_Name: Saber
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3406458396370480048
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3742880188894718964}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8760764934073509887}
+  m_LocalEulerAnglesHint: {x: 30, y: 0, z: 0}
+--- !u!212 &4146459299445769997
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3742880188894718964}
+  m_Enabled: 1
+  m_CastShadows: 2
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 6685177c6ee4c1095b686ba0c711223d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: -1504331060, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!114 &977930318301918936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3742880188894718964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7da73465a1cd12548486cf3bcd6362c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
+  idleClip:
+    sprites:
+    - {fileID: -1504331060, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1518257565, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1367949280, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -2294556, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 2009419161, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    framesPerSecond: 10
+    loop: 0
+    isAttack: 0
+    shape: 0
+    damageStat: 0
+    range: 0
+    angleOrWidth: 0
+    knockback: 0
+    movesToHitbox: 0
+    cooldown: 0
+    linkedBuff: 0
+  walkClip:
+    sprites:
+    - {fileID: 496437978, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 396008668, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1384498115, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 941076236, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1522186074, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1737216391, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1169036424, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 38606619, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    framesPerSecond: 12
+    loop: 0
+    isAttack: 0
+    shape: 0
+    damageStat: 0
+    range: 0
+    angleOrWidth: 0
+    knockback: 0
+    movesToHitbox: 0
+    cooldown: 0
+    linkedBuff: 0
+  attackClips:
+  - sprites:
+    - {fileID: 1867523324, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -29806722, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -691286194, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1510418994, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 192053753, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 681474523, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1854171092, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    framesPerSecond: 20
+    loop: 0
+    isAttack: 1
+    shape: 0
+    damageStat: 2
+    range: 3
+    angleOrWidth: 120
+    knockback: 2
+    movesToHitbox: 0
+    cooldown: 0
+    linkedBuff: 0
+  - sprites:
+    - {fileID: 111899632, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1810011505, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1001785343, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1810637664, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -276673673, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -2092683677, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    framesPerSecond: 20
+    loop: 0
+    isAttack: 1
+    shape: 0
+    damageStat: 2
+    range: 3
+    angleOrWidth: 120
+    knockback: 2
+    movesToHitbox: 0
+    cooldown: 0
+    linkedBuff: 0
+  - sprites:
+    - {fileID: 103046220, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 677764584, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1274795550, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 194874534, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 681474523, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1810011505, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1001785343, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1854171092, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    framesPerSecond: 20
+    loop: 0
+    isAttack: 1
+    shape: 0
+    damageStat: 2
+    range: 3
+    angleOrWidth: 120
+    knockback: 2
+    movesToHitbox: 0
+    cooldown: 0
+    linkedBuff: 0
+  comboResetTimer: 1
+  skills:
+  - sprites:
+    - {fileID: 129256567, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1778659163, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1800010878, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1109527087, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: -1213288040, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    - {fileID: 1815418427, guid: 70e4329987925d05186a42e5910f6841, type: 3}
+    framesPerSecond: 20
+    loop: 0
+    isAttack: 1
+    shape: 1
+    damageStat: 4
+    range: 9
+    angleOrWidth: 90
+    knockback: 10
+    movesToHitbox: 1
+    cooldown: 3.5
+    linkedBuff: 1
+  playerMovement: {fileID: 4835837774318956462}
+  enemyMovement: {fileID: 0}
+  combatSystem: {fileID: 5889307724168727458}
+  myStats: {fileID: 2961673169028449689}
+  keybinds: {fileID: 0}

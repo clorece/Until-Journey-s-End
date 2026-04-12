@@ -7,9 +7,11 @@ public class EnemyMovement : MonoBehaviour
     [Tooltip("Drag the Player object here, or leave empty to auto-find by tag.")]
     public Transform target;
 
-    [Header("Stopping")]
+    [Header("Stopping & Detection")]
     [Tooltip("How far from the target the enemy will stop.")]
     public float stoppingDistance = 2.0f;
+    [Tooltip("How close the target must be to start moving. 0 = always move.")]
+    public float detectionRadius = 10.0f;
 
     [Header("Ground Detection")]
     public LayerMask groundLayer;
@@ -58,6 +60,13 @@ public class EnemyMovement : MonoBehaviour
         toTarget.y = 0; // ignore vertical difference
 
         float distance = toTarget.magnitude;
+
+        // check detection radius
+        if (detectionRadius > 0f && distance > detectionRadius)
+        {
+            isMoving = false;
+            return;
+        }
 
         // always face the target, even when standing still
         FlipSpriteTowardsTarget();
@@ -126,6 +135,15 @@ public class EnemyMovement : MonoBehaviour
             Vector3 newPos = transform.position;
             newPos.y = hit.point.y + groundAnchorOffset;
             transform.position = newPos;
+        }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (detectionRadius > 0f)
+        {
+            Gizmos.color = new Color(1f, 1f, 0f, 0.15f);
+            Gizmos.DrawWireSphere(transform.position, detectionRadius);
         }
     }
 }

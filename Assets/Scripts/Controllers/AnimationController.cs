@@ -158,6 +158,12 @@ public class AnimationController : MonoBehaviour
         comboIndex = (comboIndex + 1) % attackClips.Length;
     }
 
+    public void ExecuteAttackClip(int index)
+    {
+        if (attackClips == null || index < 0 || index >= attackClips.Length) return;
+        ExecuteCombatMove(attackClips[index]);
+    }
+
     public void TriggerSkill(int index)
     {
         if (skills == null || index < 0 || index >= skills.Length) return;
