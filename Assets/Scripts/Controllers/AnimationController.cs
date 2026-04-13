@@ -1,5 +1,20 @@
 using UnityEngine;
 
+[System.Serializable]
+public struct ReactionFrames
+{
+    public Sprite[] sprites;
+    public float framesPerSecond;
+    public float knockback;
+}
+
+[System.Serializable]
+public struct DeathFrames
+{
+    public Sprite[] sprites;
+    public float framesPerSecond;
+}
+
 public enum LinkedBuff
 {
     None,
@@ -43,6 +58,10 @@ public class AnimationController : MonoBehaviour
     public AnimationFrames idleClip;
     public AnimationFrames walkClip;
     
+    [Header("Reactions")]
+    public ReactionFrames damagedClip;
+    public DeathFrames deathClip;
+
     [Header("Primary Combo")]
     public AnimationFrames[] attackClips; 
     public float comboResetTimer = 1.0f;
@@ -67,9 +86,15 @@ public class AnimationController : MonoBehaviour
     private int comboIndex; 
     private float lastInputTime;
     private float[] cooldownTimer;
+    private float lastHealth;
+    private bool isDamaged;
+    private bool isDead;
+
     public float[] CooldownTimer => cooldownTimer;
 
     public bool IsAttacking => isAttacking;
+    public bool IsDamaged => isDamaged;
+    public bool IsDead => isDead;
     public event System.Action<AnimationFrames> OnAttackStart;
     public event System.Action<AnimationFrames> OnAttackEnd;
 
@@ -97,14 +122,41 @@ public class AnimationController : MonoBehaviour
         SetAnimation(idleClip);
 
         cooldownTimer = new float[skills.Length];
+
+        if (myStats != null) 
+        {
+            lastHealth = myStats.CurrentHealth;
+            myStats.OnDeath += TriggerDeathAnimation;
+        }
     }
 
     void Update()
     {
+        if (isDead)
+        {
+            PlayOneShotDeathAnimation();
+            return;
+        }
+
+        if (myStats != null)
+        {
+            if (myStats.CurrentHealth < lastHealth)
+            {
+                TriggerDamageAnimation();
+            }
+            lastHealth = myStats.CurrentHealth;
+        }
+
         for (int i = 0; i < cooldownTimer.Length; i++)
         {
             if (cooldownTimer[i] > 0)
                 cooldownTimer[i] -= Time.deltaTime;
+        }
+
+        if (isDamaged)
+        {
+            PlayOneShotDamageAnimation();
+            return;
         }
 
         if (isAttacking)
@@ -151,6 +203,7 @@ public class AnimationController : MonoBehaviour
     
     public void TriggerComboAttack()
     {
+        if (isDead || isDamaged) return;
         if (attackClips.Length == 0) return;
         if (Time.time - lastInputTime > comboResetTimer) comboIndex = 0;
         lastInputTime = Time.time;
@@ -160,12 +213,14 @@ public class AnimationController : MonoBehaviour
 
     public void ExecuteAttackClip(int index)
     {
+        if (isDead || isDamaged) return;
         if (attackClips == null || index < 0 || index >= attackClips.Length) return;
         ExecuteCombatMove(attackClips[index]);
     }
 
     public void TriggerSkill(int index)
     {
+        if (isDead || isDamaged) return;
         if (skills == null || index < 0 || index >= skills.Length) return;
         if (cooldownTimer[index] > 0f) return; // if the skill is on cooldown, return
 
@@ -205,6 +260,83 @@ public class AnimationController : MonoBehaviour
                 combatSystem.PerformLineAttack(moveData.range, moveData.angleOrWidth, moveData.knockback, moveData.damageStat);
             else if (moveData.shape == CombatSystem.AttackType.Radial)
                 combatSystem.PerformRadialAttack(transform.position, moveData.range, moveData.knockback, moveData.damageStat);
+        }
+    }
+
+    public void TriggerDamageAnimation()
+    {
+        if (isDead) return;
+        if (damagedClip.sprites == null || damagedClip.sprites.Length == 0) return;
+        
+        isAttacking = false; 
+        isDamaged = true;
+        
+        currentFrameIndex = 0;
+        timer = 0f;
+        if (damagedClip.sprites.Length > 0)
+            spriteRenderer.sprite = damagedClip.sprites[0];
+    }
+
+    private void PlayOneShotDamageAnimation()
+    {
+        if (damagedClip.sprites == null || damagedClip.sprites.Length == 0)
+        {
+            isDamaged = false;
+            return;
+        }
+
+        float finalFPS = damagedClip.framesPerSecond;
+        if (finalFPS <= 0.1f) finalFPS = 1f;
+
+        float timePerFrame = 1f / finalFPS;
+        timer += Time.deltaTime;
+        if (timer >= timePerFrame)
+        {
+            timer -= timePerFrame;
+            if (currentFrameIndex >= damagedClip.sprites.Length - 1)
+            {
+                isDamaged = false; 
+                SetAnimation(idleClip);
+            }
+            else
+            {
+                currentFrameIndex++;
+                spriteRenderer.sprite = damagedClip.sprites[currentFrameIndex];
+            }
+        }
+    }
+
+    public void TriggerDeathAnimation()
+    {
+        if (deathClip.sprites == null || deathClip.sprites.Length == 0) return;
+        
+        isAttacking = false; 
+        isDamaged = false;
+        isDead = true;
+        
+        currentFrameIndex = 0;
+        timer = 0f;
+        if (deathClip.sprites.Length > 0)
+            spriteRenderer.sprite = deathClip.sprites[0];
+    }
+
+    private void PlayOneShotDeathAnimation()
+    {
+        if (deathClip.sprites == null || deathClip.sprites.Length == 0) return;
+
+        float finalFPS = deathClip.framesPerSecond;
+        if (finalFPS <= 0.1f) finalFPS = 1f;
+
+        float timePerFrame = 1f / finalFPS;
+        timer += Time.deltaTime;
+        if (timer >= timePerFrame)
+        {
+            timer -= timePerFrame;
+            if (currentFrameIndex < deathClip.sprites.Length - 1)
+            {
+                currentFrameIndex++;
+                spriteRenderer.sprite = deathClip.sprites[currentFrameIndex];
+            }
         }
     }
 

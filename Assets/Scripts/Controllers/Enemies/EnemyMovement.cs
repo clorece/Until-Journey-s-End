@@ -49,6 +49,7 @@ public class EnemyMovement : MonoBehaviour
     void FixedUpdate()
     {
         if (target == null || myStats == null) return;
+        if (myStats.IsDead) return;
 
         HandleMovement();
         ClampToGround();

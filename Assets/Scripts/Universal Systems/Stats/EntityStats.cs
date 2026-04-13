@@ -3,6 +3,13 @@ using System.Collections.Generic;
 
 public class EntityStats : MonoBehaviour, IDamageable
 {
+    [Header("Death Settings")]
+    public bool destroyOnDeath = true;
+    public float deathDelay = 0f;
+    
+    private bool isDead = false;
+    public bool IsDead => isDead;
+
     [Header("Scaling Settings")]
     [Tooltip("How much does 1 Attribute Point boost a stat? 0.01 = 1%")]
     [SerializeField] private float globalScalingFactor = 0.01f; 
@@ -152,6 +159,8 @@ public class EntityStats : MonoBehaviour, IDamageable
 
     public bool TakeDamage(float damageAmount, Vector3 knockbackSource)
     {
+        if (isDead) return false;
+
         float defense = GetStatValue(StatType.Defense);
         float finalDamage = Mathf.Max(damageAmount - defense, 0f);
 
@@ -187,7 +196,15 @@ public class EntityStats : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        isDead = true;
         OnDeath?.Invoke();
-        Destroy(gameObject); 
+        
+        if (destroyOnDeath)
+        {
+            if (deathDelay > 0f)
+                Destroy(gameObject, deathDelay);
+            else
+                Destroy(gameObject); 
+        }
     }
 }

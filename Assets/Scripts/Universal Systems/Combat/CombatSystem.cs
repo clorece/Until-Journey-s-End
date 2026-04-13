@@ -93,7 +93,7 @@ public class CombatSystem : MonoBehaviour
 
     private void ApplyDamage(GameObject target, Vector3 knockbackDir, float force, StatType damageType)
     {
-        IDamageable damageable = target.GetComponent<IDamageable>();
+        IDamageable damageable = target.GetComponentInParent<IDamageable>();
         if (damageable != null)
         {
             float damageToDeal = myStats.CalculateOutgoingDamage(damageType);

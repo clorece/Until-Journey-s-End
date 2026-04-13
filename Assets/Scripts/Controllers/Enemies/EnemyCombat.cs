@@ -53,8 +53,8 @@ public class EnemyCombat : MonoBehaviour
         if (animController == null || aimController == null) return;
         if (aimController.target == null) return;
         
-        // Don't try to attack if already attacking
-        if (animController.IsAttacking) return;
+        // Don't try to attack if already attacking or damaged
+        if (animController.IsAttacking || animController.IsDamaged) return;
 
         float distance = aimController.GetDistanceToTarget();
 
