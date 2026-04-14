@@ -5,7 +5,6 @@ public struct ReactionFrames
 {
     public Sprite[] sprites;
     public float framesPerSecond;
-    public float knockback;
 }
 
 [System.Serializable]

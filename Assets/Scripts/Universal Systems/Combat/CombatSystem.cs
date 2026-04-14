@@ -51,7 +51,7 @@ public class CombatSystem : MonoBehaviour
             // Precise Angle Check
             if (Vector3.Angle(flatForward, flatTargetDir) < angle / 2)
             {
-                ApplyDamage(hit.gameObject, forwardDir, knockbackForce, damageType);
+                ApplyDamage(hit.gameObject, directionToTarget, knockbackForce, damageType);
             }
         }
     }
@@ -72,7 +72,8 @@ public class CombatSystem : MonoBehaviour
         foreach (Collider hit in hits)
         {
             if (hit.gameObject == gameObject) continue;
-            ApplyDamage(hit.gameObject, forwardDir, knockbackForce, damageType);
+            Vector3 directionToTarget = (hit.transform.position - origin).normalized;
+            ApplyDamage(hit.gameObject, directionToTarget, knockbackForce, damageType);
         }
     }
 

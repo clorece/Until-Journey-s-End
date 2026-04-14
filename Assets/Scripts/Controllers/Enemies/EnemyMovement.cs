@@ -50,6 +50,7 @@ public class EnemyMovement : MonoBehaviour
     {
         if (target == null || myStats == null) return;
         if (myStats.IsDead) return;
+        if (myStats.IsKnockedBack) return;
 
         HandleMovement();
         ClampToGround();

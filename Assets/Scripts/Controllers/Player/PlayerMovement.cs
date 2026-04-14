@@ -41,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         if (myStats != null && myStats.IsDead) return;
+        if (myStats != null && myStats.IsKnockedBack) return;
         if (isLunging) return;
 
         inputVector.x = Input.GetAxisRaw("Horizontal");
@@ -52,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         if (myStats != null && myStats.IsDead) return;
+        if (myStats != null && myStats.IsKnockedBack) return;
 
         if (isLunging)
         {

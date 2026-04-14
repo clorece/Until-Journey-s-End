@@ -10,6 +10,10 @@ public class EntityStats : MonoBehaviour, IDamageable
     private bool isDead = false;
     public bool IsDead => isDead;
 
+    [Header("Knockback Settings")]
+    public bool immuneToKnockback = false;
+    public bool IsKnockedBack { get; private set; }
+
     [Header("Scaling Settings")]
     [Tooltip("How much does 1 Attribute Point boost a stat? 0.01 = 1%")]
     [SerializeField] private float globalScalingFactor = 0.01f; 
@@ -170,6 +174,11 @@ public class EntityStats : MonoBehaviour, IDamageable
         Debug.Log($"[COMBAT] {gameObject.name} took {finalDamage} damage. Remaining HP: {currentHealth}/{GetStatValue(StatType.MaxHealth)}");
         OnHealthChanged?.Invoke();
 
+        if (!immuneToKnockback && knockbackSource.magnitude > 0.01f)
+        {
+            ApplyKnockback(knockbackSource);
+        }
+
         OnHit?.Invoke(knockbackSource); 
 
         if (currentHealth <= 0)
@@ -192,6 +201,48 @@ public class EntityStats : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(duration);
         statModifiers[type] -= amount;
+    }
+
+    private void ApplyKnockback(Vector3 knockbackVector)
+    {
+        if (isDead) return;
+        StartCoroutine(KnockbackRoutine(knockbackVector));
+    }
+
+    private System.Collections.IEnumerator KnockbackRoutine(Vector3 knockbackVector)
+    {
+        IsKnockedBack = true;
+        
+        float duration = 0.35f; 
+        float elapsed = 0f;
+        
+        Vector3 startPosition = transform.position;
+        Vector3 horizontalDisplacement = new Vector3(knockbackVector.x, 0, knockbackVector.z);
+        Vector3 targetPosition = startPosition + horizontalDisplacement;
+        
+        // Base hop height derived from strength, plus explicit upward force
+        float peakHeight = (horizontalDisplacement.magnitude * 0.15f) + Mathf.Max(0, knockbackVector.y * 0.5f);
+
+        while (elapsed < duration)
+        {
+            if (isDead) break;
+            
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            
+            // Linear horizontal interpolation
+            Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, t);
+            
+            // Quadratic rise and fall over duration: 4 * h * t * (1 - t)
+            float verticalOffset = 4f * peakHeight * t * (1f - t);
+            currentPos.y += verticalOffset;
+            
+            transform.position = currentPos;
+            
+            yield return null;
+        }
+
+        IsKnockedBack = false;
     }
 
     private void Die()
