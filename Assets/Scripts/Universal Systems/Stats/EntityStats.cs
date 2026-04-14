@@ -14,6 +14,9 @@ public class EntityStats : MonoBehaviour, IDamageable
     public bool immuneToKnockback = false;
     public bool IsKnockedBack { get; private set; }
 
+    [Header("Debug")]
+    public bool isInvincible = false;
+
     [Header("Scaling Settings")]
     [Tooltip("How much does 1 Attribute Point boost a stat? 0.01 = 1%")]
     [SerializeField] private float globalScalingFactor = 0.01f; 
@@ -168,8 +171,11 @@ public class EntityStats : MonoBehaviour, IDamageable
         float defense = GetStatValue(StatType.Defense);
         float finalDamage = Mathf.Max(damageAmount - defense, 0f);
 
-        currentHealth -= finalDamage;
-        currentHealth = Mathf.Clamp(currentHealth, 0, GetStatValue(StatType.MaxHealth));
+        if (!isInvincible)
+        {
+            currentHealth -= finalDamage;
+            currentHealth = Mathf.Clamp(currentHealth, 0, GetStatValue(StatType.MaxHealth));
+        }
 
         Debug.Log($"[COMBAT] {gameObject.name} took {finalDamage} damage. Remaining HP: {currentHealth}/{GetStatValue(StatType.MaxHealth)}");
         OnHealthChanged?.Invoke();
