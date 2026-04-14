@@ -152,33 +152,22 @@ public class AnimationController : MonoBehaviour
                 cooldownTimer[i] -= Time.deltaTime;
         }
 
-        if (isDamaged)
-        {
-            PlayOneShotDamageAnimation();
-            return;
-        }
-
-        if (isAttacking)
-        {
-            PlayOneShotAnimation();
-            return; 
-        }
-
         if (playerMovement != null && keybinds != null)
         {
             if (Input.GetKeyDown(keybinds.basicAttack)) 
             {
+                isDamaged = false;
                 TriggerComboAttack();
                 return;
             }
 
-            // we look at how many keys are defined in the manager
             for (int i = 0; i < keybinds.skillKeys.Length; i++)
             {
                 if (Input.GetKeyDown(keybinds.skillKeys[i]))
                 {
                     if (i < skills.Length)
                     {
+                        isDamaged = false;
                         TriggerSkill(i);
                         return;
                     }
@@ -192,6 +181,24 @@ public class AnimationController : MonoBehaviour
         else if (enemyMovement != null)
             isMoving = enemyMovement.isMoving;
 
+        // Break player hit-stun globally if player is explicitly trying to move.
+        if (isDamaged && playerMovement != null && isMoving)
+        {
+            isDamaged = false;
+        }
+
+        if (isDamaged)
+        {
+            PlayOneShotDamageAnimation();
+            return;
+        }
+
+        if (isAttacking)
+        {
+            PlayOneShotAnimation();
+            return; 
+        }
+
         if (isMoving && currentAnimation.sprites != walkClip.sprites)
             SetAnimation(walkClip);
         else if (!isMoving && currentAnimation.sprites != idleClip.sprites)
@@ -202,7 +209,7 @@ public class AnimationController : MonoBehaviour
     
     public void TriggerComboAttack()
     {
-        if (isDead || isDamaged) return;
+        if (isDead) return;
         if (attackClips.Length == 0) return;
         if (Time.time - lastInputTime > comboResetTimer) comboIndex = 0;
         lastInputTime = Time.time;
@@ -212,14 +219,14 @@ public class AnimationController : MonoBehaviour
 
     public void ExecuteAttackClip(int index)
     {
-        if (isDead || isDamaged) return;
+        if (isDead) return;
         if (attackClips == null || index < 0 || index >= attackClips.Length) return;
         ExecuteCombatMove(attackClips[index]);
     }
 
     public void TriggerSkill(int index)
     {
-        if (isDead || isDamaged) return;
+        if (isDead) return;
         if (skills == null || index < 0 || index >= skills.Length) return;
         if (cooldownTimer[index] > 0f) return; // if the skill is on cooldown, return
 
@@ -232,6 +239,7 @@ public class AnimationController : MonoBehaviour
     private void ExecuteCombatMove(AnimationFrames moveData)
     {
         isAttacking = true;
+        isDamaged = false; // ensure attack cleanly interrupts any lingering impact stuns
         SetAnimation(moveData);
         OnAttackStart?.Invoke(moveData);
 

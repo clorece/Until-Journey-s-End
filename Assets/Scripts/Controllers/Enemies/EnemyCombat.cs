@@ -27,6 +27,10 @@ public class EnemyCombat : MonoBehaviour
 
     private Transform attackProxy;
     private EnemyMovement cachedMovement;
+    
+    [HideInInspector]
+    public bool isQueued = false;
+    private bool wasDamaged = false;
 
     void Start()
     {
@@ -34,6 +38,11 @@ public class EnemyCombat : MonoBehaviour
         if (aimController == null) Debug.LogWarning("EnemyCombat: Missing AimController! Please assign it in the Inspector.");
         
         cachedMovement = GetComponent<EnemyMovement>();
+
+        if (animController != null)
+        {
+            animController.OnAttackEnd += HandleAttackEnd;
+        }
 
         // If the user slaps the sprite or base object into the CombatSystem attack point, we don't want to rotate it!
         // Instead, we create an invisible proxy to handle the aiming safely.
@@ -53,7 +62,15 @@ public class EnemyCombat : MonoBehaviour
         if (animController == null || aimController == null) return;
         if (aimController.target == null) return;
         
-        // Don't try to attack if already attacking or damaged
+        // Check for interruptions
+        bool currentDamaged = animController.IsDamaged;
+        if (currentDamaged && !wasDamaged && EnemyCombatManager.Instance != null)
+        {
+            EnemyCombatManager.Instance.OnEnemyInterrupted(this);
+        }
+        wasDamaged = currentDamaged;
+
+        // Don't try to attack or queue if already attacking or damaged
         if (animController.IsAttacking || animController.IsDamaged) return;
 
         float distance = aimController.GetDistanceToTarget();
@@ -67,7 +84,15 @@ public class EnemyCombat : MonoBehaviour
 
             if (distance <= actualRangedRange)
             {
-                TryAttack();
+                if (EnemyCombatManager.Instance != null && EnemyCombatManager.Instance.IsLayerManaged(gameObject.layer))
+                    EnemyCombatManager.Instance.QueueAttack(this);
+                else
+                    BeginAttack(); // fallback if no manager or unmanaged layer
+            }
+            else
+            {
+                if (EnemyCombatManager.Instance != null)
+                    EnemyCombatManager.Instance.DequeueAttack(this);
             }
         }
         else
@@ -78,12 +103,20 @@ public class EnemyCombat : MonoBehaviour
             // Melee check
             if (distance <= meleeAttackRange)
             {
-                TryAttack();
+                if (EnemyCombatManager.Instance != null && EnemyCombatManager.Instance.IsLayerManaged(gameObject.layer))
+                    EnemyCombatManager.Instance.QueueAttack(this);
+                else
+                    BeginAttack(); // fallback if no manager or unmanaged layer
+            }
+            else
+            {
+                if (EnemyCombatManager.Instance != null)
+                    EnemyCombatManager.Instance.DequeueAttack(this);
             }
         }
     }
 
-    private void TryAttack()
+    public void BeginAttack()
     {
         // Ensure the attack point is aimed perfectly at the player
         if (!disableAimingAttackPoint && combatSystem != null && combatSystem.attackPoint != null && aimController != null && aimController.target != null)
@@ -98,6 +131,28 @@ public class EnemyCombat : MonoBehaviour
 
         // Execute the first attack clip defined in AnimationController
         animController.ExecuteAttackClip(0);
+    }
+
+    private void HandleAttackEnd(AnimationFrames finishedClip)
+    {
+        if (EnemyCombatManager.Instance != null)
+        {
+            EnemyCombatManager.Instance.NotifyAttackFinished(this);
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (animController != null)
+        {
+            animController.OnAttackEnd -= HandleAttackEnd;
+        }
+        if (EnemyCombatManager.Instance != null)
+        {
+            EnemyCombatManager.Instance.DequeueAttack(this);
+            // Optionally, if they are the active attacker when destroyed, we can call OnEnemyInterrupted to free the token.
+            EnemyCombatManager.Instance.OnEnemyInterrupted(this);
+        }
     }
 
     void OnDrawGizmosSelected()
