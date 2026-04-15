@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private float lungeSpeed;
 
     private SpriteRenderer characterSpriteRenderer;
+    private Navigation.ORCA.ORCAAgent orcaAgent;
     private EntityStats myStats;
     private Vector2 inputVector;
     private Vector3 moveDirection;
@@ -28,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         characterSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        orcaAgent = GetComponent<Navigation.ORCA.ORCAAgent>();
         myStats = GetComponent<EntityStats>();
         mainCam = Camera.main;
 
@@ -36,6 +38,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (cameraTransform == null && mainCam != null) 
             cameraTransform = mainCam.transform;
+
+        if (orcaAgent != null)
+        {
+            orcaAgent.maxSpeedOverride = myStats.GetStatValue(StatType.MoveSpeed);
+        }
     }
 
     void Update()
@@ -55,6 +62,8 @@ public class PlayerMovement : MonoBehaviour
         if (myStats != null && myStats.IsDead) return;
         if (myStats != null && myStats.IsKnockedBack) return;
 
+        Vector3 lastPos = transform.position;
+
         if (isLunging)
         {
             HandleLunge();
@@ -66,6 +75,14 @@ public class PlayerMovement : MonoBehaviour
         
         // ALWAYS clamp to ground after any movement
         ClampToGround();
+
+        // Update ORCAAgent with actual velocity for enemies to perceive
+        if (orcaAgent != null)
+        {
+            Vector3 vel = (transform.position - lastPos) / Time.fixedDeltaTime;
+            orcaAgent.currentVelocity = new Vector2(vel.x, vel.z);
+            orcaAgent.preferredVelocity = orcaAgent.currentVelocity;
+        }
     }
     
     /// <summary>

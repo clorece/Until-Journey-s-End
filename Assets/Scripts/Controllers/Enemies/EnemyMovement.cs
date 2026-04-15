@@ -1,6 +1,8 @@
 using UnityEngine;
+using Navigation.ORCA;
 
 [RequireComponent(typeof(EntityStats))]
+[RequireComponent(typeof(ORCAAgent))]
 public class EnemyMovement : MonoBehaviour
 {
     [Header("Target")]
@@ -20,7 +22,7 @@ public class EnemyMovement : MonoBehaviour
     public float groundAnchorOffset = 1.0f;
 
     private EntityStats myStats;
-    private LocalAvoidance localAvoidance;
+    private ORCAAgent orcaAgent;
     private SpriteRenderer characterSpriteRenderer;
     private Vector3 moveDirection;
 
@@ -29,7 +31,7 @@ public class EnemyMovement : MonoBehaviour
     void Start()
     {
         myStats = GetComponent<EntityStats>();
-        localAvoidance = GetComponent<LocalAvoidance>();
+        orcaAgent = GetComponent<ORCAAgent>();
         characterSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         // auto-find player if no target was assigned in the Inspector
@@ -44,6 +46,11 @@ public class EnemyMovement : MonoBehaviour
 
         if (characterSpriteRenderer == null)
             Debug.LogError("EnemyMovement: No SpriteRenderer found in children!");
+
+        if (orcaAgent != null)
+        {
+            orcaAgent.maxSpeedOverride = myStats.GetStatValue(StatType.MoveSpeed);
+        }
     }
 
     void FixedUpdate()
@@ -67,54 +74,79 @@ public class EnemyMovement : MonoBehaviour
         if (detectionRadius > 0f && distance > detectionRadius)
         {
             isMoving = false;
+            if (orcaAgent != null) orcaAgent.preferredVelocity = Vector2.zero;
             return;
         }
 
         // always face the target, even when standing still
         FlipSpriteTowardsTarget();
 
-        // debug
-        // Debug.Log($"[EnemyMovement] Target: {target.name} at {target.position}, Distance: {distance:F2}, Stopping: {stoppingDistance}");
+        float currentSpeed = myStats.GetStatValue(StatType.MoveSpeed);
+        if (orcaAgent != null) orcaAgent.maxSpeedOverride = currentSpeed;
 
-        if (distance > stoppingDistance)
+        // Use a small buffer to prevent jitter
+        float buffer = 0.1f;
+
+        if (distance > stoppingDistance + buffer)
         {
             isMoving = true;
-
-            // project movement onto ground normal for slopes
-            Vector3 desiredDir = toTarget.normalized;
-            RaycastHit hit;
-            Vector3 rayOrigin = transform.position + Vector3.up * heightOffset;
-
-            if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayLength, groundLayer))
-            {
-                moveDirection = Vector3.ProjectOnPlane(desiredDir, hit.normal).normalized;
-
-                float targetY = hit.point.y;
-                if (Mathf.Abs(transform.position.y - targetY) < 0.5f)
-                {
-                    Vector3 newPos = transform.position;
-                    newPos.y = Mathf.MoveTowards(transform.position.y, targetY, 10f * Time.fixedDeltaTime);
-                    transform.position = newPos;
-                }
-            }
-            else
-            {
-                moveDirection = desiredDir;
-            }
-
-            // blend in local avoidance so entities don't overlap
-            if (localAvoidance != null)
-            {
-                moveDirection = (moveDirection + localAvoidance.AvoidanceVector).normalized;
-            }
-
-            float currentSpeed = myStats.GetStatValue(StatType.MoveSpeed);
-            transform.Translate(moveDirection * currentSpeed * Time.fixedDeltaTime, Space.World);
+            Move(toTarget.normalized, currentSpeed);
+        }
+        else if (distance < stoppingDistance - buffer && stoppingDistance > 0.5f)
+        {
+            // We are too close! Move away to make room.
+            isMoving = true;
+            Move(-toTarget.normalized, currentSpeed * 0.75f); // Move back slightly slower
         }
         else
         {
             isMoving = false;
+            if (orcaAgent != null) orcaAgent.preferredVelocity = Vector2.zero;
         }
+    }
+
+    private void Move(Vector3 desiredDir, float speed)
+    {
+        // Set preferred velocity for ORCA
+        if (orcaAgent != null)
+        {
+            orcaAgent.preferredVelocity = new Vector2(desiredDir.x, desiredDir.z) * speed;
+            
+            // Use ORCA's calculated velocity
+            Vector2 orcaVel = orcaAgent.currentVelocity;
+            
+            if (orcaVel.sqrMagnitude < 0.001f && speed > 0.001f)
+            {
+                moveDirection = desiredDir * speed;
+            }
+            else
+            {
+                moveDirection = new Vector3(orcaVel.x, 0, orcaVel.y);
+            }
+        }
+        else
+        {
+            moveDirection = desiredDir * speed;
+        }
+
+        RaycastHit hit;
+        Vector3 rayOrigin = transform.position + Vector3.up * heightOffset;
+
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayLength, groundLayer))
+        {
+            Vector3 projectedDir = Vector3.ProjectOnPlane(moveDirection, hit.normal);
+            moveDirection = projectedDir.normalized * moveDirection.magnitude;
+
+            float targetY = hit.point.y;
+            if (Mathf.Abs(transform.position.y - targetY) < 0.5f)
+            {
+                Vector3 newPos = transform.position;
+                newPos.y = Mathf.MoveTowards(transform.position.y, targetY, 10f * Time.fixedDeltaTime);
+                transform.position = newPos;
+            }
+        }
+
+        transform.Translate(moveDirection * Time.fixedDeltaTime, Space.World);
     }
 
     private void FlipSpriteTowardsTarget()

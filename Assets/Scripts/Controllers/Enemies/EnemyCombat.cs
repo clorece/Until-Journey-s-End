@@ -24,9 +24,14 @@ public class EnemyCombat : MonoBehaviour
     [Header("Behavior Integration")]
     [Tooltip("If checked, the enemy will automatically stop moving exactly when it reaches its attack range, ensuring it naturally stops to attack.")]
     public bool syncStoppingWithAttackRange = true;
+    [Tooltip("After attacking, the enemy will back off for this many seconds to let others attack.")]
+    public float postAttackRecoveryDuration = 2.0f;
+    [Tooltip("How far the enemy will back off during its recovery period.")]
+    public float recoveryDistanceMultiplier = 1.8f;
 
     private Transform attackProxy;
     private EnemyMovement cachedMovement;
+    private float recoveryTimer = 0f;
     
     [HideInInspector]
     public bool isQueued = false;
@@ -61,17 +66,44 @@ public class EnemyCombat : MonoBehaviour
     {
         if (animController == null || aimController == null) return;
         if (aimController.target == null) return;
+
+        // Continuously update the attack proxy's rotation to face the target
+        if (!disableAimingAttackPoint && attackProxy != null && !animController.IsAttacking && !animController.IsDamaged)
+        {
+            Vector3 direction = aimController.target.position - attackProxy.position;
+            direction.y = 0f;
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                attackProxy.rotation = Quaternion.LookRotation(direction);
+            }
+        }
+
+        // Manage recovery timer
+        if (recoveryTimer > 0)
+        {
+            recoveryTimer -= Time.deltaTime;
+        }
         
         // Check for interruptions
         bool currentDamaged = animController.IsDamaged;
         if (currentDamaged && !wasDamaged && EnemyCombatManager.Instance != null)
         {
             EnemyCombatManager.Instance.OnEnemyInterrupted(this);
+            recoveryTimer = 0; // Cancel recovery if hit
         }
         wasDamaged = currentDamaged;
 
-        // Don't try to attack or queue if already attacking or damaged
-        if (animController.IsAttacking || animController.IsDamaged) return;
+        // Don't try to attack or queue if already attacking, damaged, or RECOVERING
+        if (animController.IsAttacking || animController.IsDamaged || recoveryTimer > 0)
+        {
+            // Maintain the recovery stopping distance if needed
+            if (recoveryTimer > 0 && syncStoppingWithAttackRange && cachedMovement != null)
+            {
+                float baseRange = isRanged ? (rangedAttackRange > 0 ? rangedAttackRange : aimController.detectionRadius) : meleeAttackRange;
+                cachedMovement.stoppingDistance = baseRange * recoveryDistanceMultiplier;
+            }
+            return;
+        }
 
         float distance = aimController.GetDistanceToTarget();
 
@@ -135,6 +167,16 @@ public class EnemyCombat : MonoBehaviour
 
     private void HandleAttackEnd(AnimationFrames finishedClip)
     {
+        // Start recovery timer immediately when attack finishes
+        recoveryTimer = postAttackRecoveryDuration;
+
+        // Force a temporary back-off distance
+        if (cachedMovement != null)
+        {
+            float baseRange = isRanged ? (rangedAttackRange > 0 ? rangedAttackRange : aimController.detectionRadius) : meleeAttackRange;
+            cachedMovement.stoppingDistance = baseRange * recoveryDistanceMultiplier;
+        }
+
         if (EnemyCombatManager.Instance != null)
         {
             EnemyCombatManager.Instance.NotifyAttackFinished(this);
