@@ -233,9 +233,6 @@ public class EnemyMovement : MonoBehaviour
             orcaAgent.preferredVelocity = Vector2.zero;
 
         Vector3 startPos = transform.position;
-        // CRITICAL: Lock target Y to start Y so the root object NEVER slants up or down!
-        targetPos.y = startPos.y; 
-
         float dist = Vector3.Distance(startPos, targetPos);
         float flightTime = dist / Mathf.Max(speed, 0.1f);
         float arcPeakHeight = dist * arcHeightFactor;
@@ -248,19 +245,16 @@ public class EnemyMovement : MonoBehaviour
             float t = Mathf.Clamp01(elapsedTime / flightTime);
             jumpProgress = t;
 
-            // Apply horizontal sliding AND vertical arc to the ENTIRE root object
             Vector3 currentPos = Vector3.Lerp(startPos, targetPos, t);
             currentPos.y += arcPeakHeight * 4f * t * (1f - t);
+            
             transform.position = currentPos;
             
             // Still face the target while in the air if needed, or face the destination
-            if (characterSpriteRenderer != null)
-            {
-                if (targetPos.x < transform.position.x)
-                    characterSpriteRenderer.flipX = true;  // face Left
-                else
-                    characterSpriteRenderer.flipX = false; // face Right
-            }
+            if (targetPos.x < transform.position.x)
+                characterSpriteRenderer.flipX = true;  // face Left
+            else
+                characterSpriteRenderer.flipX = false; // face Right
 
             yield return new WaitForFixedUpdate();
         }
