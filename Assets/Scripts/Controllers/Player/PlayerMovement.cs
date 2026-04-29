@@ -1,12 +1,12 @@
 using UnityEngine;
-using System.Collections; // Required for Coroutines
+using System.Collections;
 
 [RequireComponent(typeof(EntityStats))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Ground Detection")]
     public LayerMask groundLayer;
-    public float rayLength = 10.0f; // must match Y dead zone in CameraFollow.cs
+    public float rayLength = 10.0f;
     public float heightOffset = 0.5f;
     public float groundAnchorOffset = 1.0f;
 
@@ -115,10 +115,7 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 targetMoveDir = (camForward * inputVector.y) + (camRight * inputVector.x);
 
-        // we want to raycast from the center of our camera/screen to constantly clip the player on the ground layer
-        // this way we cant prevent any changes to the state of the character from changing the y level that
-        // the player is on.
-        // this also helps take account elevation and angled ground
+        // Raycast to project movement along terrain slope and handle elevation
 
         RaycastHit hit;
         Vector3 rayOrigin = transform.position + Vector3.up * heightOffset;

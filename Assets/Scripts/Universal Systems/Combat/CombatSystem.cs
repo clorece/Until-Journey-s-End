@@ -15,7 +15,7 @@ public class CombatSystem : MonoBehaviour
     public float debugAngle = 90f;     
     public float debugWidth = 2f;      
     
-    public enum AttackType { Cone, Line, Radial }
+    public enum AttackType { Cone, Line, Radial, Projectile }
 
     private EntityStats myStats;
 
@@ -102,10 +102,91 @@ public class CombatSystem : MonoBehaviour
             
             if (killed)
             {
-                Debug.Log($"[COMBAT] ({this.GetInstanceID()}) Kill detected on {target.name}. Invoking OnTargetKilled.");
+                Debug.Log($"[Combat] Kill detected: {target.name}");
                 OnTargetKilled?.Invoke(target);
             }
         }
+    }
+
+    /// <summary>
+    /// Spawns a projectile aimed at a target with predictive aiming. Universal — works for any entity.
+    /// </summary>
+    public void SpawnProjectile(GameObject prefab, Transform target, float speed, float knockbackForce, StatType damageType, bool penetrates)
+    {
+        if (prefab == null || attackPoint == null) return;
+
+        GameObject projObj = Instantiate(prefab, attackPoint.position, Quaternion.identity);
+        Projectile proj = projObj.GetComponent<Projectile>();
+
+        if (proj == null)
+        {
+            Debug.LogError($"[Combat] Projectile prefab '{prefab.name}' is missing the Projectile component!");
+            Destroy(projObj);
+            return;
+        }
+
+        // Initialize projectile with combat data
+        proj.damage = myStats.CalculateOutgoingDamage(damageType);
+        proj.knockbackForce = knockbackForce;
+        proj.penetrates = penetrates;
+        proj.targetLayers = targetLayers;
+        proj.owner = gameObject;
+
+        // Predictive aiming: estimate where the target will be when the arrow arrives
+        Vector3 targetPos;
+        if (target != null)
+        {
+            targetPos = PredictTargetPosition(target, attackPoint.position, speed);
+        }
+        else
+        {
+            targetPos = attackPoint.position + attackPoint.forward * 10f;
+        }
+
+        proj.Launch(targetPos, speed);
+    }
+
+    /// <summary>
+    /// Predicts where a target will be based on its current velocity and the projectile's travel time.
+    /// Checks ORCAAgent (movement system) and Rigidbody for velocity data.
+    /// </summary>
+    private Vector3 PredictTargetPosition(Transform target, Vector3 firePos, float projectileSpeed)
+    {
+        Vector3 targetPos = target.position;
+        Vector3 targetVelocity = Vector3.zero;
+
+        // Check ORCAAgent first (primary movement system for all entities)
+        var orcaAgent = target.GetComponent<Navigation.ORCA.ORCAAgent>();
+        if (orcaAgent != null)
+        {
+            Vector2 vel2D = orcaAgent.currentVelocity;
+            targetVelocity = new Vector3(vel2D.x, 0f, vel2D.y);
+        }
+
+        // Fallback: check Rigidbody velocity
+        if (targetVelocity.sqrMagnitude < 0.01f)
+        {
+            Rigidbody targetRb = target.GetComponent<Rigidbody>();
+            if (targetRb != null)
+                targetVelocity = targetRb.linearVelocity;
+        }
+
+        // If target is stationary, aim directly
+        if (targetVelocity.sqrMagnitude < 0.01f)
+            return targetPos;
+
+        // Iterative prediction: refine the aim point over 2 passes for better accuracy
+        Vector3 predictedPos = targetPos;
+        for (int i = 0; i < 2; i++)
+        {
+            Vector3 toTarget = predictedPos - firePos;
+            float distance = new Vector3(toTarget.x, 0f, toTarget.z).magnitude;
+            float timeToTarget = distance / Mathf.Max(projectileSpeed, 0.1f);
+
+            predictedPos = targetPos + targetVelocity * timeToTarget;
+        }
+
+        return predictedPos;
     }
 
     void OnDrawGizmos()
@@ -141,6 +222,12 @@ public class CombatSystem : MonoBehaviour
                 
             case AttackType.Radial:
                 Gizmos.DrawWireSphere(attackPoint.position, debugRange);
+                break;
+
+            case AttackType.Projectile:
+                Gizmos.color = new Color(0f, 1f, 1f, 0.5f);
+                Gizmos.DrawRay(attackPoint.position, attackPoint.forward * debugRange);
+                Gizmos.DrawWireSphere(attackPoint.position, 0.3f);
                 break;
         }
     }

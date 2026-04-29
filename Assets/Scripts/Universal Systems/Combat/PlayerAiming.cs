@@ -27,13 +27,7 @@ public class AimController : MonoBehaviour
             mainCam = Camera.main;
 
             if (mainCam == null) 
-            {
-                Debug.LogError("CRITICAL ERROR: 'Camera.main' is NULL! Go tag your camera as 'MainCamera' in the Inspector.");
-            }
-            else
-            {
-                Debug.Log("AimController: Camera found successfully.");
-            }
+                Debug.LogError("AimController: 'Camera.main' is NULL! Tag your camera as 'MainCamera'.");
         }
         else if (aimMode == AimMode.Enemy)
         {

@@ -20,6 +20,8 @@ public class EnemyCombat : MonoBehaviour
     [Header("Ranged Settings")]
     [Tooltip("The range at which this enemy can fire projectiles. Leave at 0 to just use the AimController's detectionRadius.")]
     public float rangedAttackRange = 0f;
+    [Tooltip("The range at which a ranged enemy will actively run away from the player.")]
+    public float rangedAvoidanceRadius = 6.0f;
 
     [Header("Behavior Integration")]
     [Tooltip("If checked, the enemy will automatically stop moving exactly when it reaches its attack range, ensuring it naturally stops to attack.")]
@@ -29,7 +31,7 @@ public class EnemyCombat : MonoBehaviour
     [Tooltip("How far the enemy will back off during its recovery period.")]
     public float recoveryDistanceMultiplier = 1.8f;
 
-    private Transform attackProxy;
+
     private EnemyMovement cachedMovement;
     private float recoveryTimer = 0f;
     
@@ -48,18 +50,6 @@ public class EnemyCombat : MonoBehaviour
         {
             animController.OnAttackEnd += HandleAttackEnd;
         }
-
-        // If the user slaps the sprite or base object into the CombatSystem attack point, we don't want to rotate it!
-        // Instead, we create an invisible proxy to handle the aiming safely.
-        if (combatSystem != null && combatSystem.attackPoint != null)
-        {
-            GameObject proxyObj = new GameObject("EnemyAttackProxy");
-            proxyObj.transform.SetParent(transform);
-            proxyObj.transform.position = combatSystem.attackPoint.position;
-            
-            attackProxy = proxyObj.transform;
-            combatSystem.attackPoint = attackProxy;
-        }
     }
 
     void Update()
@@ -67,14 +57,14 @@ public class EnemyCombat : MonoBehaviour
         if (animController == null || aimController == null) return;
         if (aimController.target == null) return;
 
-        // Continuously update the attack proxy's rotation to face the target
-        if (!disableAimingAttackPoint && attackProxy != null && !animController.IsAttacking && !animController.IsDamaged)
+        // Continuously aim the attack point at the target
+        if (!disableAimingAttackPoint && combatSystem != null && combatSystem.attackPoint != null && !animController.IsAttacking && !animController.IsDamaged)
         {
-            Vector3 direction = aimController.target.position - attackProxy.position;
+            Vector3 direction = aimController.target.position - combatSystem.attackPoint.position;
             direction.y = 0f;
             if (direction.sqrMagnitude > 0.001f)
             {
-                attackProxy.rotation = Quaternion.LookRotation(direction);
+                combatSystem.attackPoint.rotation = Quaternion.LookRotation(direction);
             }
         }
 
@@ -96,23 +86,27 @@ public class EnemyCombat : MonoBehaviour
         // Don't try to attack or queue if already attacking, damaged, or RECOVERING
         if (animController.IsAttacking || animController.IsDamaged || recoveryTimer > 0)
         {
-            // Maintain the recovery stopping distance if needed
-            if (recoveryTimer > 0 && syncStoppingWithAttackRange && cachedMovement != null)
+            // Maintain the recovery stopping distance if needed (melee only)
+            if (recoveryTimer > 0 && syncStoppingWithAttackRange && cachedMovement != null && !isRanged)
             {
-                float baseRange = isRanged ? (rangedAttackRange > 0 ? rangedAttackRange : aimController.detectionRadius) : meleeAttackRange;
-                cachedMovement.stoppingDistance = baseRange * recoveryDistanceMultiplier;
+                cachedMovement.stoppingDistance = meleeAttackRange * recoveryDistanceMultiplier;
             }
             return;
         }
 
-        float distance = aimController.GetDistanceToTarget();
+        // Calculate distance from root transform to match EnemyMovement's calculation.
+        // Using aimController.GetDistanceToTarget() can cause directional bias if
+        // the AimController is on a child object with a local offset.
+        Vector3 diff = aimController.target.position - transform.position;
+        diff.y = 0f;
+        float distance = diff.magnitude;
 
         if (isRanged)
         {
             float actualRangedRange = rangedAttackRange > 0f ? rangedAttackRange : aimController.detectionRadius;
             
             if (syncStoppingWithAttackRange && cachedMovement != null)
-                cachedMovement.stoppingDistance = actualRangedRange * 0.95f; // stop just barely inside the range
+                cachedMovement.stoppingDistance = rangedAvoidanceRadius; // flee threshold is now independently controlled
 
             if (distance <= actualRangedRange)
             {
@@ -170,11 +164,10 @@ public class EnemyCombat : MonoBehaviour
         // Start recovery timer immediately when attack finishes
         recoveryTimer = postAttackRecoveryDuration;
 
-        // Force a temporary back-off distance
-        if (cachedMovement != null)
+        // Force a temporary back-off distance (melee only)
+        if (cachedMovement != null && !isRanged)
         {
-            float baseRange = isRanged ? (rangedAttackRange > 0 ? rangedAttackRange : aimController.detectionRadius) : meleeAttackRange;
-            cachedMovement.stoppingDistance = baseRange * recoveryDistanceMultiplier;
+            cachedMovement.stoppingDistance = meleeAttackRange * recoveryDistanceMultiplier;
         }
 
         if (EnemyCombatManager.Instance != null)

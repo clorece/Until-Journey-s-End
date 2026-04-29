@@ -9,6 +9,12 @@ public class EnemyMovement : MonoBehaviour
     [Tooltip("Drag the Player object here, or leave empty to auto-find by tag.")]
     public Transform target;
 
+    public enum EnemyType { Melee, Ranged }
+
+    [Header("Behavior")]
+    [Tooltip("Melee will move towards the player. Ranged will move away from the player.")]
+    public EnemyType enemyType = EnemyType.Melee;
+
     [Header("Stopping & Detection")]
     [Tooltip("How far from the target the enemy will stop.")]
     public float stoppingDistance = 2.0f;
@@ -87,21 +93,45 @@ public class EnemyMovement : MonoBehaviour
         // Use a small buffer to prevent jitter
         float buffer = 0.1f;
 
-        if (distance > stoppingDistance + buffer)
+        if (enemyType == EnemyType.Melee)
         {
-            isMoving = true;
-            Move(toTarget.normalized, currentSpeed);
+            if (distance > stoppingDistance + buffer)
+            {
+                isMoving = true;
+                Move(toTarget.normalized, currentSpeed);
+            }
+            else if (distance < stoppingDistance - buffer && stoppingDistance > 0.5f)
+            {
+                // We are too close! Move away to make room.
+                isMoving = true;
+                Move(-toTarget.normalized, currentSpeed * 0.75f); // Move back slightly slower
+            }
+            else
+            {
+                isMoving = false;
+                if (orcaAgent != null) orcaAgent.preferredVelocity = Vector2.zero;
+            }
         }
-        else if (distance < stoppingDistance - buffer && stoppingDistance > 0.5f)
+        else if (enemyType == EnemyType.Ranged)
         {
-            // We are too close! Move away to make room.
-            isMoving = true;
-            Move(-toTarget.normalized, currentSpeed * 0.75f); // Move back slightly slower
-        }
-        else
-        {
-            isMoving = false;
-            if (orcaAgent != null) orcaAgent.preferredVelocity = Vector2.zero;
+            if (distance < stoppingDistance - buffer)
+            {
+                // Player breached avoidance range! Move away to maintain distance.
+                isMoving = true;
+                Move(-toTarget.normalized, currentSpeed);
+            }
+            else if (distance > stoppingDistance + buffer)
+            {
+                // Inside detection range, but outside avoidance range! Approach the player.
+                isMoving = true;
+                Move(toTarget.normalized, currentSpeed);
+            }
+            else
+            {
+                // Sweet spot (right at the edge of avoidance range), hold position and fire
+                isMoving = false;
+                if (orcaAgent != null) orcaAgent.preferredVelocity = Vector2.zero;
+            }
         }
     }
 

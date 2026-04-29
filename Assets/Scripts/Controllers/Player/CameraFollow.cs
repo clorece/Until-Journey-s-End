@@ -17,9 +17,6 @@ public class CameraFollow : MonoBehaviour
     public Vector3 pivotOffset = new Vector3(0.0f, 1.5f, 0.0f);
 
 
-    // TODO: force render (might be z clipping?)  sprite over the ground layer, so we wont have
-    // to offset the everything to avoid clipping
-
     private Vector3 currentVelocity;
 
     void LateUpdate()

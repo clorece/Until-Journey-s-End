@@ -65,10 +65,7 @@ public class Buffs : MonoBehaviour
 
     private bool strifeKillConfirmed = false;
     
-    void Awake()
-    {
-        Debug.Log($"[StrifeDebug] Buffs component AWAKE on {gameObject.name}");
-    }
+
 
     void Start()
     {
@@ -77,24 +74,22 @@ public class Buffs : MonoBehaviour
         entityStats = GetComponent<EntityStats>();
         if (entityStats == null) entityStats = GetComponentInParent<EntityStats>();
         
-        if (entityStats == null) Debug.LogError($"[StrifeDebug] EntityStats NOT FOUND on {gameObject.name} or parents!");
+        if (entityStats == null) Debug.LogError($"[Buffs] EntityStats NOT FOUND on {gameObject.name} or parents!");
 
         if (animationController != null)
         {
             animationController.OnAttackStart += HandleAttackStart;
             animationController.OnAttackEnd += HandleAttackEnd;
-            Debug.Log($"[StrifeDebug] Subscribed to AnimationController events on {gameObject.name}");
         }
 
         CombatSystem combat = GetComponentInParent<CombatSystem>();
         if (combat != null)
         {
             combat.OnTargetKilled += HandleTargetKilled;
-            Debug.Log($"[StrifeDebug] Subscribed to CombatSystem ({combat.GetInstanceID()}) events on {gameObject.name}");
         }
         else
         {
-             Debug.LogError($"[StrifeDebug] CombatSystem NOT FOUND on {gameObject.name} or parents!");
+            Debug.LogWarning($"[Buffs] CombatSystem not found on {gameObject.name} or parents.");
         }
     }
 
@@ -119,7 +114,6 @@ public class Buffs : MonoBehaviour
         {
             case LinkedBuff.Strife:
                 strifeKillConfirmed = false;
-                Debug.Log($"[StrifeDebug] Strife Attack Started! Reset kill confirmation.");
                 break;
             case LinkedBuff.Vengeance:
                 // TODO: Implement Vengeance start logic
@@ -148,7 +142,6 @@ public class Buffs : MonoBehaviour
                 if (isAttacking)
                 {
                     strifeKillConfirmed = true;
-                    Debug.Log($"[StrifeDebug] STRIFE KILL CONFIRMED! Stacks will increase.");
                     AddStrifeStack();
                 }
                 break;
@@ -169,16 +162,8 @@ public class Buffs : MonoBehaviour
         switch (attack.linkedBuff)
         {
             case LinkedBuff.Strife:
-                // If the attack ended without a confirmed kill, reset everything
                 if (!strifeKillConfirmed)
-                {
-                    Debug.Log($"[StrifeDebug] Strife Attack Ended WITHOUT kill. Resetting stacks.");
                     ResetStrife();
-                }
-                else
-                {
-                    Debug.Log($"[StrifeDebug] Strife Attack Ended WITH kill. Stacks preserved.");
-                }
                 break;
             case LinkedBuff.Vengeance:
                 // TODO: Implement Vengeance end logic
@@ -225,11 +210,7 @@ public class Buffs : MonoBehaviour
         // Revert old before applying new
         RevertStrifeModifiers();
 
-        if (entityStats == null)
-        {
-            Debug.LogError("[StrifeDebug] Cannot apply stats: EntityStats is null!");
-            return;
-        }
+        if (entityStats == null) return;
 
         float moveSpeedBuff = 0f;
         float damageBuff = 0f;
@@ -280,11 +261,7 @@ public class Buffs : MonoBehaviour
     }
     #endregion
 
-    #region Revenge Logic
-    
-    #endregion
-
-    #region Revenge Logic
+    #region Vengeance Logic
     
     #endregion
 

@@ -177,7 +177,7 @@ public class EntityStats : MonoBehaviour, IDamageable
             currentHealth = Mathf.Clamp(currentHealth, 0, GetStatValue(StatType.MaxHealth));
         }
 
-        Debug.Log($"[COMBAT] {gameObject.name} took {finalDamage} damage. Remaining HP: {currentHealth}/{GetStatValue(StatType.MaxHealth)}");
+        Debug.Log($"[Combat] {gameObject.name} took {finalDamage} dmg. HP: {currentHealth}/{GetStatValue(StatType.MaxHealth)}");
         OnHealthChanged?.Invoke();
 
         if (!immuneToKnockback && knockbackSource.magnitude > 0.01f)
@@ -189,7 +189,7 @@ public class EntityStats : MonoBehaviour, IDamageable
 
         if (currentHealth <= 0)
         {
-            Debug.Log($"[COMBAT] {gameObject.name} DIED. Returning true.");
+            Debug.Log($"[Combat] {gameObject.name} died.");
             Die();
             return true;
         }

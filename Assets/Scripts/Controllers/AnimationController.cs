@@ -47,6 +47,11 @@ public struct AnimationFrames
     [Header("Cooldown")]
     public float cooldown;
 
+    [Header("Projectile Settings")]
+    public GameObject projectilePrefab;
+    public float projectileSpeed;
+    public bool projectilePenetrates;
+
     [Header("Buff Link")]
     public LinkedBuff linkedBuff;
 }
@@ -243,6 +248,9 @@ public class AnimationController : MonoBehaviour
         SetAnimation(moveData);
         OnAttackStart?.Invoke(moveData);
 
+        // DEBUG: Trace projectile spawn chain
+        Debug.Log($"[AnimController] ExecuteCombatMove: combatSystem={combatSystem != null}, isAttack={moveData.isAttack}, shape={moveData.shape}, prefab={moveData.projectilePrefab != null}");
+
         if (combatSystem != null && moveData.isAttack)
         {
             if (playerMovement != null && moveData.movesToHitbox)
@@ -267,6 +275,22 @@ public class AnimationController : MonoBehaviour
                 combatSystem.PerformLineAttack(moveData.range, moveData.angleOrWidth, moveData.knockback, moveData.damageStat);
             else if (moveData.shape == CombatSystem.AttackType.Radial)
                 combatSystem.PerformRadialAttack(transform.position, moveData.range, moveData.knockback, moveData.damageStat);
+            else if (moveData.shape == CombatSystem.AttackType.Projectile && moveData.projectilePrefab != null)
+            {
+                // Resolve the target for the projectile
+                Transform projectileTarget = null;
+                if (enemyMovement != null)
+                    projectileTarget = enemyMovement.target;
+
+                combatSystem.SpawnProjectile(
+                    moveData.projectilePrefab,
+                    projectileTarget,
+                    moveData.projectileSpeed,
+                    moveData.knockback,
+                    moveData.damageStat,
+                    moveData.projectilePenetrates
+                );
+            }
         }
     }
 

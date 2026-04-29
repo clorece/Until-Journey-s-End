@@ -6,8 +6,10 @@ public class EnemyCombatManager : MonoBehaviour
     public static EnemyCombatManager Instance { get; private set; }
 
     [Header("Queue Settings")]
-    [Tooltip("Global cooldown before another enemy can attack after one has finished.")]
-    public float globalCooldown = 1.0f;
+    [Tooltip("Global cooldown before another melee enemy can attack after one has finished.")]
+    public float meleeGlobalCooldown = 1.0f;
+    [Tooltip("Global cooldown before another ranged enemy can attack after one has finished.")]
+    public float rangedGlobalCooldown = 0.5f;
     [Tooltip("Only enemies matching this layer mask will be queued. Enemies on other layers attack instantly.")]
     public LayerMask managedEnemyLayers;
 
@@ -15,17 +17,19 @@ public class EnemyCombatManager : MonoBehaviour
     [Header("Debug")]
     public bool showDebugLogs = false;
 
-    private List<EnemyCombat> waitingQueue = new List<EnemyCombat>();
-    private EnemyCombat activeAttacker;
-    private float cooldownTimer;
+    // Separate queues for melee and ranged
+    private List<EnemyCombat> meleeQueue = new List<EnemyCombat>();
+    private List<EnemyCombat> rangedQueue = new List<EnemyCombat>();
+    private EnemyCombat activeMeleeAttacker;
+    private EnemyCombat activeRangedAttacker;
+    private float meleeCooldownTimer;
+    private float rangedCooldownTimer;
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            // Optionally make it persistent depending on your game architecture
-            // DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -35,31 +39,35 @@ public class EnemyCombatManager : MonoBehaviour
 
     void Update()
     {
+        // Process melee queue
+        ProcessQueue(ref meleeCooldownTimer, ref activeMeleeAttacker, meleeQueue, meleeGlobalCooldown, "Melee");
+
+        // Process ranged queue (independently)
+        ProcessQueue(ref rangedCooldownTimer, ref activeRangedAttacker, rangedQueue, rangedGlobalCooldown, "Ranged");
+    }
+
+    private void ProcessQueue(ref float cooldownTimer, ref EnemyCombat activeAttacker, List<EnemyCombat> queue, float cooldown, string label)
+    {
         if (cooldownTimer > 0f)
         {
-            float prevCooldown = cooldownTimer;
             cooldownTimer -= Time.deltaTime;
-            
+
             if (cooldownTimer <= 0f && showDebugLogs)
-            {
-                Debug.Log("[EnemyCombatManager] Global cooldown finished. Ready for next attacker.");
-            }
+                Debug.Log($"[EnemyCombatManager] {label} cooldown finished. Ready for next attacker.");
         }
-        else if (activeAttacker == null && waitingQueue.Count > 0)
+        else if (activeAttacker == null && queue.Count > 0)
         {
             // Prune null references before executing
-            waitingQueue.RemoveAll(e => e == null || !e.gameObject.activeInHierarchy);
+            queue.RemoveAll(e => e == null || !e.gameObject.activeInHierarchy);
 
-            if (waitingQueue.Count > 0)
+            if (queue.Count > 0)
             {
-                activeAttacker = waitingQueue[0];
-                waitingQueue.RemoveAt(0);
-                
+                activeAttacker = queue[0];
+                queue.RemoveAt(0);
+
                 if (showDebugLogs)
-                {
-                    Debug.Log($"[EnemyCombatManager] Token Granted to: {activeAttacker.gameObject.name}. Remaining in queue: {waitingQueue.Count}");
-                }
-                
+                    Debug.Log($"[EnemyCombatManager] {label} Token Granted to: {activeAttacker.gameObject.name}. Remaining in queue: {queue.Count}");
+
                 activeAttacker.BeginAttack();
             }
         }
@@ -72,61 +80,102 @@ public class EnemyCombatManager : MonoBehaviour
 
     public void QueueAttack(EnemyCombat enemy)
     {
-        if (!waitingQueue.Contains(enemy) && activeAttacker != enemy)
+        List<EnemyCombat> queue = enemy.isRanged ? rangedQueue : meleeQueue;
+        EnemyCombat active = enemy.isRanged ? activeRangedAttacker : activeMeleeAttacker;
+
+        if (!queue.Contains(enemy) && active != enemy)
         {
-            waitingQueue.Add(enemy);
+            queue.Add(enemy);
             enemy.isQueued = true;
-            
+
             if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Queued: {enemy.gameObject.name}. Total in queue: {waitingQueue.Count}");
+            {
+                string label = enemy.isRanged ? "Ranged" : "Melee";
+                Debug.Log($"[EnemyCombatManager] {label} Queued: {enemy.gameObject.name}. Total in queue: {queue.Count}");
+            }
         }
     }
 
     public void DequeueAttack(EnemyCombat enemy)
     {
-        if (waitingQueue.Contains(enemy))
+        List<EnemyCombat> queue = enemy.isRanged ? rangedQueue : meleeQueue;
+
+        if (queue.Contains(enemy))
         {
-            waitingQueue.Remove(enemy);
+            queue.Remove(enemy);
             enemy.isQueued = false;
-            
+
             if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Dequeued: {enemy.gameObject.name}. Remaining: {waitingQueue.Count}");
+            {
+                string label = enemy.isRanged ? "Ranged" : "Melee";
+                Debug.Log($"[EnemyCombatManager] {label} Dequeued: {enemy.gameObject.name}. Remaining: {queue.Count}");
+            }
         }
     }
 
     public void NotifyAttackFinished(EnemyCombat enemy)
     {
-        if (activeAttacker == enemy)
+        if (enemy.isRanged && activeRangedAttacker == enemy)
         {
             if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Attack Finished constraint for: {enemy.gameObject.name}. Triggering Global Cooldown: {globalCooldown}s");
+                Debug.Log($"[EnemyCombatManager] Ranged Attack Finished: {enemy.gameObject.name}. Cooldown: {rangedGlobalCooldown}s");
 
-            activeAttacker.isQueued = false;
-            activeAttacker = null;
-            cooldownTimer = globalCooldown;
+            activeRangedAttacker.isQueued = false;
+            activeRangedAttacker = null;
+            rangedCooldownTimer = rangedGlobalCooldown;
+        }
+        else if (!enemy.isRanged && activeMeleeAttacker == enemy)
+        {
+            if (showDebugLogs)
+                Debug.Log($"[EnemyCombatManager] Melee Attack Finished: {enemy.gameObject.name}. Cooldown: {meleeGlobalCooldown}s");
+
+            activeMeleeAttacker.isQueued = false;
+            activeMeleeAttacker = null;
+            meleeCooldownTimer = meleeGlobalCooldown;
         }
     }
 
     public void OnEnemyInterrupted(EnemyCombat enemy)
     {
-        if (activeAttacker == enemy)
+        if (enemy.isRanged)
         {
-            if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Active Attacker {enemy.gameObject.name} INTERRUPTED! Penalizing Global Cooldown.");
+            if (activeRangedAttacker == enemy)
+            {
+                if (showDebugLogs)
+                    Debug.Log($"[EnemyCombatManager] Ranged Attacker {enemy.gameObject.name} INTERRUPTED!");
 
-            // Eject active attacker and penalize queue
-            activeAttacker.isQueued = false;
-            activeAttacker = null;
-            cooldownTimer = globalCooldown * 0.5f; // Penalize with half global cooldown instead of full to keep combat flowing 
+                activeRangedAttacker.isQueued = false;
+                activeRangedAttacker = null;
+                rangedCooldownTimer = rangedGlobalCooldown * 0.5f;
+            }
+            else if (rangedQueue.Contains(enemy))
+            {
+                if (showDebugLogs)
+                    Debug.Log($"[EnemyCombatManager] Waiting Ranged {enemy.gameObject.name} hit! Pushed to back.");
+
+                rangedQueue.Remove(enemy);
+                rangedQueue.Add(enemy);
+            }
         }
-        else if (waitingQueue.Contains(enemy))
+        else
         {
-            if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Waiting Enemy {enemy.gameObject.name} was hit! Pushing to BACK of the queue.");
+            if (activeMeleeAttacker == enemy)
+            {
+                if (showDebugLogs)
+                    Debug.Log($"[EnemyCombatManager] Melee Attacker {enemy.gameObject.name} INTERRUPTED!");
 
-            // Requeue waiting enemy to the bottom of the list
-            waitingQueue.Remove(enemy);
-            waitingQueue.Add(enemy);
+                activeMeleeAttacker.isQueued = false;
+                activeMeleeAttacker = null;
+                meleeCooldownTimer = meleeGlobalCooldown * 0.5f;
+            }
+            else if (meleeQueue.Contains(enemy))
+            {
+                if (showDebugLogs)
+                    Debug.Log($"[EnemyCombatManager] Waiting Melee {enemy.gameObject.name} hit! Pushed to back.");
+
+                meleeQueue.Remove(enemy);
+                meleeQueue.Add(enemy);
+            }
         }
     }
 }
