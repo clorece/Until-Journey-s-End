@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 [System.Serializable]
 public struct ReactionFrames
@@ -43,6 +44,21 @@ public struct AnimationFrames
 
     [Header("Movement Logic")]
     public bool movesToHitbox; 
+    public bool isJump;
+    [Range(0f, 1f)] public float jumpArcHeightFactor;
+    public float attackDelay;
+    
+    [Header("Jump Animation Sync")]
+    public bool syncFramesToJump;
+    public int jumpAscendFrames;
+    public int jumpDescendFrames;
+
+    [Header("Skill Execution Range")]
+    [Tooltip("The MAXIMUM distance from the target required to use this skill. If 0, it is ignored.")]
+    public float skillExecutionRange;
+    
+    [Tooltip("The MINIMUM distance from the target required to use this skill. Useful to prevent jumping over targets that are too close. If 0, it is ignored.")]
+    public float skillMinimumRange;
 
     [Header("Cooldown")]
     public float cooldown;
@@ -243,6 +259,13 @@ public class AnimationController : MonoBehaviour
 
     private void ExecuteCombatMove(AnimationFrames moveData)
     {
+        if (moveData.sprites == null || moveData.sprites.Length == 0)
+        {
+            Debug.LogWarning("[AnimController] Warning: Tried to execute combat move but it has no sprites! Skipping and releasing token.");
+            OnAttackEnd?.Invoke(moveData);
+            return;
+        }
+
         isAttacking = true;
         isDamaged = false; // ensure attack cleanly interrupts any lingering impact stuns
         SetAnimation(moveData);
@@ -253,7 +276,13 @@ public class AnimationController : MonoBehaviour
 
         if (combatSystem != null && moveData.isAttack)
         {
-            if (playerMovement != null && moveData.movesToHitbox)
+            if (moveData.isJump && enemyMovement != null && enemyMovement.target != null)
+            {
+                float speed = moveData.projectileSpeed > 0 ? moveData.projectileSpeed : 15f;
+                Vector3 predictedPos = combatSystem.PredictTargetPosition(enemyMovement.target, transform.position, speed);
+                enemyMovement.ApplyJump(predictedPos, speed, moveData.jumpArcHeightFactor);
+            }
+            else if (playerMovement != null && moveData.movesToHitbox)
             {
                 float distance = moveData.range;
                 float speed = 20f; 
@@ -269,28 +298,50 @@ public class AnimationController : MonoBehaviour
                 playerMovement.ApplyLunge(lungeDir, speed, duration);
             }
 
-            if (moveData.shape == CombatSystem.AttackType.Cone)
-                combatSystem.PerformConeAttack(moveData.range, moveData.angleOrWidth, moveData.knockback, moveData.damageStat);
-            else if (moveData.shape == CombatSystem.AttackType.Line)
-                combatSystem.PerformLineAttack(moveData.range, moveData.angleOrWidth, moveData.knockback, moveData.damageStat);
-            else if (moveData.shape == CombatSystem.AttackType.Radial)
-                combatSystem.PerformRadialAttack(transform.position, moveData.range, moveData.knockback, moveData.damageStat);
-            else if (moveData.shape == CombatSystem.AttackType.Projectile && moveData.projectilePrefab != null)
+            if (moveData.syncFramesToJump)
             {
-                // Resolve the target for the projectile
-                Transform projectileTarget = null;
-                if (enemyMovement != null)
-                    projectileTarget = enemyMovement.target;
-
-                combatSystem.SpawnProjectile(
-                    moveData.projectilePrefab,
-                    projectileTarget,
-                    moveData.projectileSpeed,
-                    moveData.knockback,
-                    moveData.damageStat,
-                    moveData.projectilePenetrates
-                );
+                // Damage is handled dynamically by PlayOneShotAnimation exactly upon landing!
             }
+            else if (moveData.attackDelay > 0f)
+            {
+                StartCoroutine(DelayedAttackRoutine(moveData));
+            }
+            else
+            {
+                PerformAttackShapes(moveData);
+            }
+        }
+    }
+
+    private IEnumerator DelayedAttackRoutine(AnimationFrames moveData)
+    {
+        yield return new WaitForSeconds(moveData.attackDelay);
+        PerformAttackShapes(moveData);
+    }
+
+    private void PerformAttackShapes(AnimationFrames moveData)
+    {
+        if (moveData.shape == CombatSystem.AttackType.Cone)
+            combatSystem.PerformConeAttack(moveData.range, moveData.angleOrWidth, moveData.knockback, moveData.damageStat);
+        else if (moveData.shape == CombatSystem.AttackType.Line)
+            combatSystem.PerformLineAttack(moveData.range, moveData.angleOrWidth, moveData.knockback, moveData.damageStat);
+        else if (moveData.shape == CombatSystem.AttackType.Radial)
+            combatSystem.PerformRadialAttack(transform.position, moveData.range, moveData.knockback, moveData.damageStat);
+        else if (moveData.shape == CombatSystem.AttackType.Projectile && moveData.projectilePrefab != null)
+        {
+            // Resolve the target for the projectile
+            Transform projectileTarget = null;
+            if (enemyMovement != null)
+                projectileTarget = enemyMovement.target;
+
+            combatSystem.SpawnProjectile(
+                moveData.projectilePrefab,
+                projectileTarget,
+                moveData.projectileSpeed,
+                moveData.knockback,
+                moveData.damageStat,
+                moveData.projectilePenetrates
+            );
         }
     }
 
@@ -397,6 +448,57 @@ public class AnimationController : MonoBehaviour
     {
         if (currentAnimation.sprites == null || currentAnimation.sprites.Length == 0) return;
 
+        // Custom Jump Sync Logic
+        if (currentAnimation.isJump && currentAnimation.syncFramesToJump && enemyMovement != null)
+        {
+            if (enemyMovement.isJumping)
+            {
+                float t = enemyMovement.jumpProgress; // 0.0 to 1.0
+                
+                if (t < 0.5f)
+                {
+                    // Ascending
+                    float ascendProgress = t * 2f; // 0 to 1
+                    currentFrameIndex = Mathf.Clamp(Mathf.FloorToInt(ascendProgress * currentAnimation.jumpAscendFrames), 0, currentAnimation.jumpAscendFrames - 1);
+                }
+                else
+                {
+                    // Descending
+                    float descendProgress = (t - 0.5f) * 2f; // 0 to 1
+                    int startIndex = currentAnimation.jumpAscendFrames;
+                    int descendIndex = Mathf.Clamp(Mathf.FloorToInt(descendProgress * currentAnimation.jumpDescendFrames), 0, currentAnimation.jumpDescendFrames - 1);
+                    currentFrameIndex = startIndex + descendIndex;
+                }
+                
+                if (currentFrameIndex < currentAnimation.sprites.Length)
+                    spriteRenderer.sprite = currentAnimation.sprites[currentFrameIndex];
+                    
+                return; // Do NOT advance the normal timer while in the air!
+            }
+            else
+            {
+                // We have landed! 
+                int landedStartIndex = currentAnimation.jumpAscendFrames + currentAnimation.jumpDescendFrames;
+                
+                if (currentFrameIndex < landedStartIndex)
+                {
+                    // Exactly on the frame we hit the ground
+                    currentFrameIndex = landedStartIndex;
+                    if (currentFrameIndex < currentAnimation.sprites.Length)
+                        spriteRenderer.sprite = currentAnimation.sprites[currentFrameIndex];
+                    
+                    timer = 0f; // Reset timer for the landed frames
+                    
+                    // Trigger damage instantly upon landing
+                    PerformAttackShapes(currentAnimation);
+                    return;
+                }
+                
+                // Normal playback for the remaining landed frames (fall through to normal timer)
+            }
+        }
+
+        // Standard Playback Logic
         float finalFPS = currentAnimation.framesPerSecond;
         if (isAttacking && myStats != null)
         {
@@ -412,9 +514,13 @@ public class AnimationController : MonoBehaviour
             timer -= timePerFrame;
             if (currentFrameIndex >= currentAnimation.sprites.Length - 1)
             {
-                OnAttackEnd?.Invoke(currentAnimation);
+                AnimationFrames finishedClip = currentAnimation;
                 isAttacking = false; 
                 SetAnimation(idleClip);
+                
+                // IMPORTANT: Invoke AFTER resetting to idle. 
+                // This allows the combo system to instantly start the next attack without being overwritten!
+                OnAttackEnd?.Invoke(finishedClip);
             }
             else
             {

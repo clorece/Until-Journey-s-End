@@ -1,35 +1,48 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+[System.Serializable]
+public class TierSettings
+{
+    public float meleeGlobalCooldown = 1.0f;
+    public float rangedGlobalCooldown = 0.5f;
+}
+
+public class TierQueue
+{
+    public List<EnemyCombat> meleeQueue = new List<EnemyCombat>();
+    public List<EnemyCombat> rangedQueue = new List<EnemyCombat>();
+    public EnemyCombat activeMeleeAttacker;
+    public EnemyCombat activeRangedAttacker;
+    public float meleeCooldownTimer;
+    public float rangedCooldownTimer;
+}
+
 public class EnemyCombatManager : MonoBehaviour
 {
     public static EnemyCombatManager Instance { get; private set; }
 
-    [Header("Queue Settings")]
-    [Tooltip("Global cooldown before another melee enemy can attack after one has finished.")]
-    public float meleeGlobalCooldown = 1.0f;
-    [Tooltip("Global cooldown before another ranged enemy can attack after one has finished.")]
-    public float rangedGlobalCooldown = 0.5f;
+    [Header("Tier 1 Settings (Minions)")]
+    public TierSettings tier1Settings = new TierSettings { meleeGlobalCooldown = 1.0f, rangedGlobalCooldown = 0.5f };
+
+    [Header("Tier 2 Settings (High Value Targets)")]
+    public TierSettings tier2Settings = new TierSettings { meleeGlobalCooldown = 0.8f, rangedGlobalCooldown = 0.4f };
+
+    [Header("Global Settings")]
     [Tooltip("Only enemies matching this layer mask will be queued. Enemies on other layers attack instantly.")]
     public LayerMask managedEnemyLayers;
 
-    
     [Header("Debug")]
     public bool showDebugLogs = false;
 
-    // Separate queues for melee and ranged
-    private List<EnemyCombat> meleeQueue = new List<EnemyCombat>();
-    private List<EnemyCombat> rangedQueue = new List<EnemyCombat>();
-    private EnemyCombat activeMeleeAttacker;
-    private EnemyCombat activeRangedAttacker;
-    private float meleeCooldownTimer;
-    private float rangedCooldownTimer;
+    private Dictionary<EnemyCombat.EnemyTier, TierQueue> tierQueues;
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            InitializeQueues();
         }
         else
         {
@@ -37,13 +50,28 @@ public class EnemyCombatManager : MonoBehaviour
         }
     }
 
+    private void InitializeQueues()
+    {
+        tierQueues = new Dictionary<EnemyCombat.EnemyTier, TierQueue>
+        {
+            { EnemyCombat.EnemyTier.Tier1, new TierQueue() },
+            { EnemyCombat.EnemyTier.Tier2, new TierQueue() }
+            // Bosses (Tier3) bypass queues completely
+        };
+    }
+
     void Update()
     {
-        // Process melee queue
-        ProcessQueue(ref meleeCooldownTimer, ref activeMeleeAttacker, meleeQueue, meleeGlobalCooldown, "Melee");
+        ProcessTier(EnemyCombat.EnemyTier.Tier1, tier1Settings);
+        ProcessTier(EnemyCombat.EnemyTier.Tier2, tier2Settings);
+    }
 
-        // Process ranged queue (independently)
-        ProcessQueue(ref rangedCooldownTimer, ref activeRangedAttacker, rangedQueue, rangedGlobalCooldown, "Ranged");
+    private void ProcessTier(EnemyCombat.EnemyTier tier, TierSettings settings)
+    {
+        if (!tierQueues.TryGetValue(tier, out TierQueue tq)) return;
+
+        ProcessQueue(ref tq.meleeCooldownTimer, ref tq.activeMeleeAttacker, tq.meleeQueue, settings.meleeGlobalCooldown, $"{tier} Melee");
+        ProcessQueue(ref tq.rangedCooldownTimer, ref tq.activeRangedAttacker, tq.rangedQueue, settings.rangedGlobalCooldown, $"{tier} Ranged");
     }
 
     private void ProcessQueue(ref float cooldownTimer, ref EnemyCombat activeAttacker, List<EnemyCombat> queue, float cooldown, string label)
@@ -80,8 +108,11 @@ public class EnemyCombatManager : MonoBehaviour
 
     public void QueueAttack(EnemyCombat enemy)
     {
-        List<EnemyCombat> queue = enemy.isRanged ? rangedQueue : meleeQueue;
-        EnemyCombat active = enemy.isRanged ? activeRangedAttacker : activeMeleeAttacker;
+        if (enemy.tier == EnemyCombat.EnemyTier.Tier3) return; // Bosses don't queue
+        if (!tierQueues.TryGetValue(enemy.tier, out TierQueue tq)) return;
+
+        List<EnemyCombat> queue = enemy.isRanged ? tq.rangedQueue : tq.meleeQueue;
+        EnemyCombat active = enemy.isRanged ? tq.activeRangedAttacker : tq.activeMeleeAttacker;
 
         if (!queue.Contains(enemy) && active != enemy)
         {
@@ -91,14 +122,17 @@ public class EnemyCombatManager : MonoBehaviour
             if (showDebugLogs)
             {
                 string label = enemy.isRanged ? "Ranged" : "Melee";
-                Debug.Log($"[EnemyCombatManager] {label} Queued: {enemy.gameObject.name}. Total in queue: {queue.Count}");
+                Debug.Log($"[EnemyCombatManager] {enemy.tier} {label} Queued: {enemy.gameObject.name}. Total in queue: {queue.Count}");
             }
         }
     }
 
     public void DequeueAttack(EnemyCombat enemy)
     {
-        List<EnemyCombat> queue = enemy.isRanged ? rangedQueue : meleeQueue;
+        if (enemy.tier == EnemyCombat.EnemyTier.Tier3) return;
+        if (!tierQueues.TryGetValue(enemy.tier, out TierQueue tq)) return;
+
+        List<EnemyCombat> queue = enemy.isRanged ? tq.rangedQueue : tq.meleeQueue;
 
         if (queue.Contains(enemy))
         {
@@ -108,73 +142,81 @@ public class EnemyCombatManager : MonoBehaviour
             if (showDebugLogs)
             {
                 string label = enemy.isRanged ? "Ranged" : "Melee";
-                Debug.Log($"[EnemyCombatManager] {label} Dequeued: {enemy.gameObject.name}. Remaining: {queue.Count}");
+                Debug.Log($"[EnemyCombatManager] {enemy.tier} {label} Dequeued: {enemy.gameObject.name}. Remaining: {queue.Count}");
             }
         }
     }
 
     public void NotifyAttackFinished(EnemyCombat enemy)
     {
-        if (enemy.isRanged && activeRangedAttacker == enemy)
+        if (enemy.tier == EnemyCombat.EnemyTier.Tier3) return;
+        if (!tierQueues.TryGetValue(enemy.tier, out TierQueue tq)) return;
+        TierSettings settings = enemy.tier == EnemyCombat.EnemyTier.Tier1 ? tier1Settings : tier2Settings;
+
+        if (enemy.isRanged && tq.activeRangedAttacker == enemy)
         {
             if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Ranged Attack Finished: {enemy.gameObject.name}. Cooldown: {rangedGlobalCooldown}s");
+                Debug.Log($"[EnemyCombatManager] {enemy.tier} Ranged Attack Finished: {enemy.gameObject.name}. Cooldown: {settings.rangedGlobalCooldown}s");
 
-            activeRangedAttacker.isQueued = false;
-            activeRangedAttacker = null;
-            rangedCooldownTimer = rangedGlobalCooldown;
+            tq.activeRangedAttacker.isQueued = false;
+            tq.activeRangedAttacker = null;
+            tq.rangedCooldownTimer = settings.rangedGlobalCooldown;
         }
-        else if (!enemy.isRanged && activeMeleeAttacker == enemy)
+        else if (!enemy.isRanged && tq.activeMeleeAttacker == enemy)
         {
             if (showDebugLogs)
-                Debug.Log($"[EnemyCombatManager] Melee Attack Finished: {enemy.gameObject.name}. Cooldown: {meleeGlobalCooldown}s");
+                Debug.Log($"[EnemyCombatManager] {enemy.tier} Melee Attack Finished: {enemy.gameObject.name}. Cooldown: {settings.meleeGlobalCooldown}s");
 
-            activeMeleeAttacker.isQueued = false;
-            activeMeleeAttacker = null;
-            meleeCooldownTimer = meleeGlobalCooldown;
+            tq.activeMeleeAttacker.isQueued = false;
+            tq.activeMeleeAttacker = null;
+            tq.meleeCooldownTimer = settings.meleeGlobalCooldown;
         }
     }
 
     public void OnEnemyInterrupted(EnemyCombat enemy)
     {
+        if (enemy.tier == EnemyCombat.EnemyTier.Tier3) return;
+        if (!tierQueues.TryGetValue(enemy.tier, out TierQueue tq)) return;
+        TierSettings settings = enemy.tier == EnemyCombat.EnemyTier.Tier1 ? tier1Settings : tier2Settings;
+
         if (enemy.isRanged)
         {
-            if (activeRangedAttacker == enemy)
+            if (tq.activeRangedAttacker == enemy)
             {
                 if (showDebugLogs)
-                    Debug.Log($"[EnemyCombatManager] Ranged Attacker {enemy.gameObject.name} INTERRUPTED!");
+                    Debug.Log($"[EnemyCombatManager] {enemy.tier} Ranged Attacker {enemy.gameObject.name} INTERRUPTED!");
 
-                activeRangedAttacker.isQueued = false;
-                activeRangedAttacker = null;
-                rangedCooldownTimer = rangedGlobalCooldown * 0.5f;
+                tq.activeRangedAttacker.isQueued = false;
+                tq.activeRangedAttacker = null;
+                tq.rangedCooldownTimer = settings.rangedGlobalCooldown * 0.5f;
             }
-            else if (rangedQueue.Contains(enemy))
+            else if (tq.rangedQueue.Contains(enemy))
             {
                 if (showDebugLogs)
-                    Debug.Log($"[EnemyCombatManager] Waiting Ranged {enemy.gameObject.name} hit! Pushed to back.");
+                    Debug.Log($"[EnemyCombatManager] Waiting {enemy.tier} Ranged {enemy.gameObject.name} hit! Pushed to back.");
 
-                rangedQueue.Remove(enemy);
-                rangedQueue.Add(enemy);
+                tq.rangedQueue.Remove(enemy);
+                tq.rangedQueue.Add(enemy);
             }
         }
         else
         {
-            if (activeMeleeAttacker == enemy)
+            if (tq.activeMeleeAttacker == enemy)
             {
                 if (showDebugLogs)
-                    Debug.Log($"[EnemyCombatManager] Melee Attacker {enemy.gameObject.name} INTERRUPTED!");
+                    Debug.Log($"[EnemyCombatManager] {enemy.tier} Melee Attacker {enemy.gameObject.name} INTERRUPTED!");
 
-                activeMeleeAttacker.isQueued = false;
-                activeMeleeAttacker = null;
-                meleeCooldownTimer = meleeGlobalCooldown * 0.5f;
+                tq.activeMeleeAttacker.isQueued = false;
+                tq.activeMeleeAttacker = null;
+                tq.meleeCooldownTimer = settings.meleeGlobalCooldown * 0.5f;
             }
-            else if (meleeQueue.Contains(enemy))
+            else if (tq.meleeQueue.Contains(enemy))
             {
                 if (showDebugLogs)
-                    Debug.Log($"[EnemyCombatManager] Waiting Melee {enemy.gameObject.name} hit! Pushed to back.");
+                    Debug.Log($"[EnemyCombatManager] Waiting {enemy.tier} Melee {enemy.gameObject.name} hit! Pushed to back.");
 
-                meleeQueue.Remove(enemy);
-                meleeQueue.Add(enemy);
+                tq.meleeQueue.Remove(enemy);
+                tq.meleeQueue.Add(enemy);
             }
         }
     }

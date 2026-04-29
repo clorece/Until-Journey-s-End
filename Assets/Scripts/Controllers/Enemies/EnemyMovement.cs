@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using Navigation.ORCA;
 
 [RequireComponent(typeof(EntityStats))]
@@ -33,6 +34,8 @@ public class EnemyMovement : MonoBehaviour
     private Vector3 moveDirection;
 
     public bool isMoving { get; private set; }
+    public bool isJumping { get; private set; }
+    public float jumpProgress { get; private set; }
 
     void Start()
     {
@@ -65,8 +68,11 @@ public class EnemyMovement : MonoBehaviour
         if (myStats.IsDead) return;
         if (myStats.IsKnockedBack) return;
 
-        HandleMovement();
-        ClampToGround();
+        if (!isJumping)
+        {
+            HandleMovement();
+            ClampToGround();
+        }
     }
 
     private void HandleMovement()
@@ -209,5 +215,61 @@ public class EnemyMovement : MonoBehaviour
             Gizmos.color = new Color(1f, 1f, 0f, 0.15f);
             Gizmos.DrawWireSphere(transform.position, detectionRadius);
         }
+    }
+
+    public void ApplyJump(Vector3 targetPos, float speed, float arcHeightFactor)
+    {
+        if (isJumping) return;
+        StartCoroutine(JumpRoutine(targetPos, speed, arcHeightFactor));
+    }
+
+    private IEnumerator JumpRoutine(Vector3 targetPos, float speed, float arcHeightFactor)
+    {
+        isJumping = true;
+        isMoving = false;
+        jumpProgress = 0f;
+        
+        if (orcaAgent != null) 
+            orcaAgent.preferredVelocity = Vector2.zero;
+
+        Vector3 startPos = transform.position;
+        // CRITICAL: Lock target Y to start Y so the root object NEVER slants up or down!
+        targetPos.y = startPos.y; 
+
+        float dist = Vector3.Distance(startPos, targetPos);
+        float flightTime = dist / Mathf.Max(speed, 0.1f);
+        float arcPeakHeight = dist * arcHeightFactor;
+        
+        float elapsedTime = 0f;
+
+        while (elapsedTime < flightTime)
+        {
+            elapsedTime += Time.fixedDeltaTime;
+            float t = Mathf.Clamp01(elapsedTime / flightTime);
+            jumpProgress = t;
+
+            // Apply horizontal sliding AND vertical arc to the ENTIRE root object
+            Vector3 currentPos = Vector3.Lerp(startPos, targetPos, t);
+            currentPos.y += arcPeakHeight * 4f * t * (1f - t);
+            transform.position = currentPos;
+            
+            // Still face the target while in the air if needed, or face the destination
+            if (characterSpriteRenderer != null)
+            {
+                if (targetPos.x < transform.position.x)
+                    characterSpriteRenderer.flipX = true;  // face Left
+                else
+                    characterSpriteRenderer.flipX = false; // face Right
+            }
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        // Snap precisely to target at the end
+        transform.position = targetPos;
+        ClampToGround(); // Ensure we are planted firmly upon landing
+
+        jumpProgress = 1f;
+        isJumping = false;
     }
 }

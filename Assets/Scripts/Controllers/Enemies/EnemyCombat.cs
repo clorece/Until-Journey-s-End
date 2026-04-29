@@ -7,7 +7,11 @@ public class EnemyCombat : MonoBehaviour
     public AimController aimController;
     public CombatSystem combatSystem;
 
+    public enum EnemyTier { Tier1, Tier2, Tier3 }
+
     [Header("Combat Type")]
+    [Tooltip("Tier 1 = Minions, Tier 2 = High Value Targets, Tier 3 = Bosses (bypasses queues)")]
+    public EnemyTier tier = EnemyTier.Tier1;
     [Tooltip("If true, the enemy is ranged. If false, the enemy is melee.")]
     public bool isRanged = false;
     [Tooltip("If checked, EnemyCombat will completely ignore trying to aim the attack point. Use this to test if EnemyCombat is causing your sprite spin.")]
@@ -34,6 +38,8 @@ public class EnemyCombat : MonoBehaviour
 
     private EnemyMovement cachedMovement;
     private float recoveryTimer = 0f;
+    private int currentComboIndex = 0;
+    private bool isExecutingSkill = false;
     
     [HideInInspector]
     public bool isQueued = false;
@@ -110,10 +116,12 @@ public class EnemyCombat : MonoBehaviour
 
             if (distance <= actualRangedRange)
             {
-                if (EnemyCombatManager.Instance != null && EnemyCombatManager.Instance.IsLayerManaged(gameObject.layer))
+                if (tier == EnemyTier.Tier3)
+                    BeginAttack();
+                else if (EnemyCombatManager.Instance != null && EnemyCombatManager.Instance.IsLayerManaged(gameObject.layer))
                     EnemyCombatManager.Instance.QueueAttack(this);
                 else
-                    BeginAttack(); // fallback if no manager or unmanaged layer
+                    BeginAttack(); 
             }
             else
             {
@@ -123,16 +131,41 @@ public class EnemyCombat : MonoBehaviour
         }
         else
         {
+            // Dynamically determine melee engage range based on available skills
+            float effectiveMeleeRange = meleeAttackRange;
+            if (animController != null && animController.skills != null)
+            {
+                for (int i = 0; i < animController.skills.Length; i++)
+                {
+                    if (animController.CooldownTimer != null && i < animController.CooldownTimer.Length && animController.CooldownTimer[i] <= 0f)
+                    {
+                        AnimationFrames skillData = animController.skills[i];
+                        
+                        // Check if we meet the minimum distance requirement (if one is set)
+                        if (skillData.skillMinimumRange <= 0f || distance >= skillData.skillMinimumRange)
+                        {
+                            // Expand the queue distance to the skill's MAXIMUM execution range!
+                            if (skillData.skillExecutionRange > effectiveMeleeRange)
+                            {
+                                effectiveMeleeRange = skillData.skillExecutionRange;
+                            }
+                        }
+                    }
+                }
+            }
+
             if (syncStoppingWithAttackRange && cachedMovement != null)
-                cachedMovement.stoppingDistance = meleeAttackRange * 0.95f;
+                cachedMovement.stoppingDistance = effectiveMeleeRange * 0.95f;
 
             // Melee check
-            if (distance <= meleeAttackRange)
+            if (distance <= effectiveMeleeRange)
             {
-                if (EnemyCombatManager.Instance != null && EnemyCombatManager.Instance.IsLayerManaged(gameObject.layer))
+                if (tier == EnemyTier.Tier3)
+                    BeginAttack();
+                else if (EnemyCombatManager.Instance != null && EnemyCombatManager.Instance.IsLayerManaged(gameObject.layer))
                     EnemyCombatManager.Instance.QueueAttack(this);
                 else
-                    BeginAttack(); // fallback if no manager or unmanaged layer
+                    BeginAttack();
             }
             else
             {
@@ -155,11 +188,97 @@ public class EnemyCombat : MonoBehaviour
             }
         }
 
-        // Execute the first attack clip defined in AnimationController
-        animController.ExecuteAttackClip(0);
+        isExecutingSkill = false;
+
+        // 1. Prioritize Skills (if any exist and are off cooldown)
+        if (animController.skills != null && animController.skills.Length > 0)
+        {
+            float distToTarget = 0f;
+            if (aimController != null && aimController.target != null)
+            {
+                Vector3 toTarget = aimController.target.position - transform.position;
+                toTarget.y = 0;
+                distToTarget = toTarget.magnitude;
+            }
+
+            for (int i = 0; i < animController.skills.Length; i++)
+            {
+                if (animController.CooldownTimer != null && i < animController.CooldownTimer.Length && animController.CooldownTimer[i] <= 0f)
+                {
+                    AnimationFrames skillData = animController.skills[i];
+                    bool inRange = true;
+
+                    if (skillData.skillExecutionRange > 0f)
+                    {
+                        if (distToTarget > skillData.skillExecutionRange)
+                            inRange = false;
+                    }
+                    
+                    if (skillData.skillMinimumRange > 0f)
+                    {
+                        if (distToTarget < skillData.skillMinimumRange)
+                            inRange = false;
+                    }
+
+                    if (inRange)
+                    {
+                        isExecutingSkill = true;
+                        animController.TriggerSkill(i);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 2. Otherwise, start the standard attack combo
+        currentComboIndex = 0;
+        if (animController.attackClips != null && animController.attackClips.Length > 0)
+        {
+            animController.ExecuteAttackClip(currentComboIndex);
+        }
+        else
+        {
+            // Failsafe if no attacks exist
+            FinishAttackSequence();
+        }
     }
 
     private void HandleAttackEnd(AnimationFrames finishedClip)
+    {
+        if (isExecutingSkill)
+        {
+            isExecutingSkill = false;
+            FinishAttackSequence();
+        }
+        else
+        {
+            currentComboIndex++;
+            if (animController.attackClips != null && currentComboIndex < animController.attackClips.Length)
+            {
+                // Continue the combo!
+                
+                // Re-aim for the next hit of the combo to track the player if they moved
+                if (!disableAimingAttackPoint && combatSystem != null && combatSystem.attackPoint != null && aimController != null && aimController.target != null)
+                {
+                    Vector3 direction = aimController.target.position - combatSystem.attackPoint.position;
+                    direction.y = 0f;
+                    if (direction.sqrMagnitude > 0.001f)
+                    {
+                        combatSystem.attackPoint.rotation = Quaternion.LookRotation(direction);
+                    }
+                }
+
+                animController.ExecuteAttackClip(currentComboIndex);
+            }
+            else
+            {
+                // Combo finished!
+                FinishAttackSequence();
+            }
+        }
+    }
+
+    private void FinishAttackSequence()
     {
         // Start recovery timer immediately when attack finishes
         recoveryTimer = postAttackRecoveryDuration;

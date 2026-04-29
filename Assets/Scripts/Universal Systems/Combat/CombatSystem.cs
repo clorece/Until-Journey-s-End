@@ -150,7 +150,7 @@ public class CombatSystem : MonoBehaviour
     /// Predicts where a target will be based on its current velocity and the projectile's travel time.
     /// Checks ORCAAgent (movement system) and Rigidbody for velocity data.
     /// </summary>
-    private Vector3 PredictTargetPosition(Transform target, Vector3 firePos, float projectileSpeed)
+    public Vector3 PredictTargetPosition(Transform target, Vector3 firePos, float projectileSpeed)
     {
         Vector3 targetPos = target.position;
         Vector3 targetVelocity = Vector3.zero;
