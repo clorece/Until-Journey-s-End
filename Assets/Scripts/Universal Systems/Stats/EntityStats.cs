@@ -195,6 +195,19 @@ public class EntityStats : MonoBehaviour, IDamageable
         }
         return false;
     }
+
+    /// <summary>
+    /// Restores health by the specified amount, clamped to MaxHealth.
+    /// </summary>
+    public void Heal(float amount)
+    {
+        if (isDead) return;
+
+        currentHealth += amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, GetStatValue(StatType.MaxHealth));
+        OnHealthChanged?.Invoke();
+        Debug.Log($"[EntityStats] {gameObject.name} healed for {amount}. HP: {currentHealth}/{GetStatValue(StatType.MaxHealth)}");
+    }
     
     public void AddModifier(StatType type, float amount, float duration)
     {
@@ -255,6 +268,12 @@ public class EntityStats : MonoBehaviour, IDamageable
     {
         isDead = true;
         OnDeath?.Invoke();
+
+        // If this is the player and a run is active, notify RunManager
+        if (GetComponent<PlayerMovement>() != null && RunManager.Instance != null)
+        {
+            RunManager.Instance.OnPlayerDeath();
+        }
         
         if (destroyOnDeath)
         {

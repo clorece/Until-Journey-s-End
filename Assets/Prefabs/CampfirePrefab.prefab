@@ -1,0 +1,151 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3806832279482270413
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2520724804041682921}
+  - component: {fileID: 684859201242361415}
+  - component: {fileID: 6519371964097334787}
+  m_Layer: 0
+  m_Name: CampfirePrefab
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2520724804041682921
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3806832279482270413}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
+  m_LocalPosition: {x: -352.81424, y: -22.14129, z: 128.26134}
+  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 0, z: 0}
+--- !u!212 &684859201242361415
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3806832279482270413}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 924840713, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.32, y: 0.32}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!114 &6519371964097334787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3806832279482270413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d469ee1270ca63745b1514bd90e19504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Campfire
+  interactRange: 2
+  promptText: Press F to Interact
+  colliderSize: {x: 1, y: 1, z: 1}
+  animationFrames:
+  - {fileID: 924840713, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1512909980, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1677637890, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 927629158, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -653448375, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -427636027, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -399849745, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -667415412, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1623884980, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 489918586, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 754207300, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 388095063, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1654047978, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 225478352, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 2112981293, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 254964968, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -737981269, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 2049649072, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 1792769110, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1276848479, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 590360284, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -807704557, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 946260725, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1442579722, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 428581141, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -825937310, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 842579537, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 956057894, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 1457701936, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -891283650, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 1242792611, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -1235783341, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 662382244, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 2144943065, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -289782872, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 1897380789, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -972213903, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 558593574, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: -941241136, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  - {fileID: 914560489, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
+  framesPerSecond: 6

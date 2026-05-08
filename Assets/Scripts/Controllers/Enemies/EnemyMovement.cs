@@ -22,6 +22,10 @@ public class EnemyMovement : MonoBehaviour
     [Tooltip("How close the target must be to start moving. 0 = always move.")]
     public float detectionRadius = 10.0f;
 
+    [Header("Zone Boundary")]
+    [Tooltip("If assigned, the enemy will be clamped within this zone's boundaries.")]
+    public InstanceZone boundaryZone;
+
     [Header("Ground Detection")]
     public LayerMask groundLayer;
     public float rayLength = 10.0f;
@@ -46,11 +50,10 @@ public class EnemyMovement : MonoBehaviour
         // auto-find player if no target was assigned in the Inspector
         if (target == null)
         {
-            GameObject player = GameObject.Find("Player");
-            if (player != null)
-                target = player.transform;
+            if (RunManager.Instance != null && RunManager.Instance.player != null)
+                target = RunManager.Instance.player;
             else
-                Debug.LogWarning("EnemyMovement: No target assigned and no 'Player' object found!");
+                Debug.LogWarning("EnemyMovement: No target assigned and RunManager player not found!");
         }
 
         if (characterSpriteRenderer == null)
@@ -72,6 +75,12 @@ public class EnemyMovement : MonoBehaviour
         {
             HandleMovement();
             ClampToGround();
+        }
+
+        // Clamp position to zone boundary if one is assigned
+        if (boundaryZone != null)
+        {
+            transform.position = boundaryZone.ClampToBounds(transform.position);
         }
     }
 

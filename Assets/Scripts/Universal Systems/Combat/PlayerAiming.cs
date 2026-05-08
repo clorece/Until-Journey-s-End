@@ -33,11 +33,10 @@ public class AimController : MonoBehaviour
         {
             if (target == null)
             {
-                GameObject player = GameObject.Find("Player");
-                if (player != null)
-                    target = player.transform;
+                if (RunManager.Instance != null && RunManager.Instance.player != null)
+                    target = RunManager.Instance.player;
                 else
-                    Debug.LogWarning("AimController: No target assigned and no 'Player' object found!");
+                    Debug.LogWarning("AimController: No target assigned and RunManager player not found!");
             }
         }
     }

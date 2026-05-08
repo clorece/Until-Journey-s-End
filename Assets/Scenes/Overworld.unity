@@ -2363,6 +2363,65 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &510770029
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 510770031}
+  - component: {fileID: 510770030}
+  m_Layer: 0
+  m_Name: Zone_Respite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &510770030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 510770029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 3
+  size: {x: 20, y: 20, z: 20}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs: []
+  totalEnemies: 10
+  maxActiveEnemies: 3
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 2
+--- !u!4 &510770031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 510770029}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -453.36594, y: -33.67541, z: 619.15}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &538028643
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3158,6 +3217,95 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1766490383188478063, guid: a93f80d252523a14d9206681c7713ce8, type: 3}
   m_PrefabInstance: {fileID: 670502342}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &680183593
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 680183597}
+  - component: {fileID: 680183596}
+  - component: {fileID: 680183595}
+  - component: {fileID: 680183594}
+  m_Layer: 0
+  m_Name: RunManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &680183594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680183593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d767bda0c2fdffd4996e4e2adfa0eef8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PortalSpawner
+  portalPrefab: {fileID: 3397302241525972149, guid: ae94c18360946524dae0f0ce288657fc, type: 3}
+  chestPrefab: {fileID: 6638388894597851497, guid: f8c363ad5e0070c46a2eb78744b1462b, type: 3}
+  campfirePrefab: {fileID: 3806832279482270413, guid: 71c85111b2fc63b4b90b3676f2943db0, type: 3}
+--- !u!114 &680183595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680183593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056f87bc76492fe44aef70166ad87481, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+  initialDelay: 0.5
+  showDebugLogs: 0
+--- !u!114 &680183596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680183593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4948f809abab1704bbeaaf990a677024, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RunManager
+  hubZone: {fileID: 1425642028}
+  instanceZones:
+  - {fileID: 1791789079}
+  - {fileID: 1977953548}
+  - {fileID: 1339375308}
+  - {fileID: 1550605561}
+  - {fileID: 1155231149}
+  - {fileID: 1686884411}
+  - {fileID: 510770030}
+  player: {fileID: 8315525035740146921}
+  enemySpawner: {fileID: 680183595}
+  portalSpawner: {fileID: 680183594}
+  showDebugLogs: 1
+  debugSkipCombat: 1
+--- !u!4 &680183597
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680183593}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -385.14395, y: -25.44834, z: 224.75708}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &760271326 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5690025392898430016, guid: 3da684c126c6dec4f9205fa049a629e9, type: 3}
@@ -4814,6 +4962,68 @@ Transform:
   - {fileID: 1823417442}
   m_Father: {fileID: 217421267}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1155231148
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1155231150}
+  - component: {fileID: 1155231149}
+  m_Layer: 0
+  m_Name: Zone_Challenge_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1155231149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155231148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 4
+  size: {x: 30, y: 20, z: 30}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs:
+  - {fileID: 5423958227820177619, guid: 89700159ee9b9144ba75323378b3b215, type: 3}
+  - {fileID: 1446317179180591922, guid: 5e1d320197947164f8ce3e2a685da7ad, type: 3}
+  - {fileID: 7472404632400908094, guid: b3611a9d98b553d49ad129c626e67247, type: 3}
+  totalEnemies: 16
+  maxActiveEnemies: 8
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1155231150
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155231148}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 15.14627, y: -25.00127, z: 464.68228}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1190709891
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5366,6 +5576,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -95.730255
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 103.06047
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.107402116
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.035427358
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.98366916
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.14001709
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 15.536
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 1273.274
+      objectReference: {fileID: 0}
+    - target: {fileID: 9098141500987435424, guid: 74350d270a6a36d4f9cc35a08d52b501, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 1445.944
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5397,6 +5643,67 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 179.3445, y: 175.9027, z: 324.24747}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1339375307
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1339375309}
+  - component: {fileID: 1339375308}
+  m_Layer: 0
+  m_Name: Zone_Combat_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1339375308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339375307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 1
+  size: {x: 30, y: 20, z: 30}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs:
+  - {fileID: 1446317179180591922, guid: 5e1d320197947164f8ce3e2a685da7ad, type: 3}
+  - {fileID: 7472404632400908094, guid: b3611a9d98b553d49ad129c626e67247, type: 3}
+  totalEnemies: 8
+  maxActiveEnemies: 4
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1339375309
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339375307}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -318.68317, y: -15.39739, z: -2.97213}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5539,6 +5846,65 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1358338489}
   m_CullTransparentMesh: 1
+--- !u!1 &1425642027
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1425642029}
+  - component: {fileID: 1425642028}
+  m_Layer: 0
+  m_Name: Zone_Hub
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1425642028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425642027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 0
+  size: {x: 50, y: 20, z: 50}
+  spawnPoints: []
+  portalOffsetZ: 12.5
+  portalSpacing: 4
+  enemyPrefabs: []
+  totalEnemies: 10
+  maxActiveEnemies: 3
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1425642029
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425642027}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -338.817, y: -26.49558, z: 238.30743}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1434029545
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6129,6 +6495,68 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!1 &1550605560
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1550605562}
+  - component: {fileID: 1550605561}
+  m_Layer: 0
+  m_Name: Zone_Challenge_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1550605561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550605560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 4
+  size: {x: 30, y: 20, z: 30}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs:
+  - {fileID: 5423958227820177619, guid: 89700159ee9b9144ba75323378b3b215, type: 3}
+  - {fileID: 1446317179180591922, guid: 5e1d320197947164f8ce3e2a685da7ad, type: 3}
+  - {fileID: 7472404632400908094, guid: b3611a9d98b553d49ad129c626e67247, type: 3}
+  totalEnemies: 16
+  maxActiveEnemies: 8
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1550605562
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550605560}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -437.8372, y: -33.72522, z: 579.5798}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1575350618
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6605,6 +7033,68 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!1 &1686884410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1686884412}
+  - component: {fileID: 1686884411}
+  m_Layer: 0
+  m_Name: Zone_Challenge_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1686884411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686884410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 4
+  size: {x: 30, y: 20, z: 30}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs:
+  - {fileID: 5423958227820177619, guid: 89700159ee9b9144ba75323378b3b215, type: 3}
+  - {fileID: 1446317179180591922, guid: 5e1d320197947164f8ce3e2a685da7ad, type: 3}
+  - {fileID: 7472404632400908094, guid: b3611a9d98b553d49ad129c626e67247, type: 3}
+  totalEnemies: 16
+  maxActiveEnemies: 8
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1686884412
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686884410}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 148.4324, y: -17.19588, z: 257.8852}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1687468187
 GameObject:
   m_ObjectHideFlags: 0
@@ -7127,6 +7617,67 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 425797958840048917, guid: f0702830c1970764693293a91df9e61c, type: 3}
   m_PrefabInstance: {fileID: 425797958395090590}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1791789078
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1791789080}
+  - component: {fileID: 1791789079}
+  m_Layer: 0
+  m_Name: Zone_Combat_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1791789079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791789078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 1
+  size: {x: 30, y: 20, z: 30}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs:
+  - {fileID: 1446317179180591922, guid: 5e1d320197947164f8ce3e2a685da7ad, type: 3}
+  - {fileID: 7472404632400908094, guid: b3611a9d98b553d49ad129c626e67247, type: 3}
+  totalEnemies: 8
+  maxActiveEnemies: 4
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1791789080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791789078}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -466.4976, y: -23.44627, z: 151.35144}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1814867691
 GameObject:
   m_ObjectHideFlags: 0
@@ -7842,6 +8393,67 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1977953547
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1977953549}
+  - component: {fileID: 1977953548}
+  m_Layer: 0
+  m_Name: Zone_Combat_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1977953548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977953547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60e7e9e6f1289c41abdb6daf51bf0db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InstanceZone
+  zoneType: 1
+  size: {x: 30, y: 20, z: 30}
+  spawnPoints: []
+  portalOffsetZ: 5
+  portalSpacing: 4
+  enemyPrefabs:
+  - {fileID: 1446317179180591922, guid: 5e1d320197947164f8ce3e2a685da7ad, type: 3}
+  - {fileID: 7472404632400908094, guid: b3611a9d98b553d49ad129c626e67247, type: 3}
+  totalEnemies: 8
+  maxActiveEnemies: 4
+  spawnInterval: 2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  portalVerticalOffset: 2
+  chestVerticalOffset: 1
+  campfireVerticalOffset: 0.5
+--- !u!4 &1977953549
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977953547}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -210.7, y: -21.73866, z: 141.22601}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1987837938
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8524,8 +9136,16 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
+      propertyPath: baseDefense
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
       propertyPath: isInvincible
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
+      propertyPath: baseMaxHealth
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
       propertyPath: destroyOnDeath
@@ -9339,9 +9959,21 @@ PrefabInstance:
       value: Main Camera
       objectReference: {fileID: 0}
     - target: {fileID: 7333104715109170967, guid: c11c40d199ad4e248b769c5df6796f3e, type: 3}
+      propertyPath: lookAheadX
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7333104715109170967, guid: c11c40d199ad4e248b769c5df6796f3e, type: 3}
       propertyPath: playerTarget
       value: 
       objectReference: {fileID: 8315525035740146921}
+    - target: {fileID: 7333104715109170967, guid: c11c40d199ad4e248b769c5df6796f3e, type: 3}
+      propertyPath: pivotOffset.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7333104715109170967, guid: c11c40d199ad4e248b769c5df6796f3e, type: 3}
+      propertyPath: pivotOffset.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7333104715109170967, guid: c11c40d199ad4e248b769c5df6796f3e, type: 3}
       propertyPath: orientationRef
       value: 
@@ -10158,5 +10790,14 @@ SceneRoots:
   - {fileID: 2102009159}
   - {fileID: 197224676}
   - {fileID: 1335522993}
+  - {fileID: 1425642029}
+  - {fileID: 1791789080}
+  - {fileID: 1977953549}
+  - {fileID: 1339375309}
+  - {fileID: 1550605562}
+  - {fileID: 1155231150}
+  - {fileID: 1686884412}
+  - {fileID: 510770031}
   - {fileID: 2017856402}
   - {fileID: 849803492}
+  - {fileID: 680183597}
