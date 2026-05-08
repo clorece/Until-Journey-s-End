@@ -334,14 +334,33 @@ public class AnimationController : MonoBehaviour
             if (enemyMovement != null)
                 projectileTarget = enemyMovement.target;
 
-            combatSystem.SpawnProjectile(
-                moveData.projectilePrefab,
-                projectileTarget,
-                moveData.projectileSpeed,
-                moveData.knockback,
-                moveData.damageStat,
-                moveData.projectilePenetrates
-            );
+            // Player mode: aim projectile toward mouse world position instead of a transform target
+            AimController aim = GetComponentInParent<AimController>();
+            if (aim == null) aim = GetComponentInChildren<AimController>();
+
+            if (projectileTarget == null && aim != null && aim.aimMode == AimController.AimMode.Player)
+            {
+                // Use the mouse-aimed overload so the projectile flies toward the cursor
+                combatSystem.SpawnProjectileAtPoint(
+                    moveData.projectilePrefab,
+                    aim.GetMouseWorldPoint(),
+                    moveData.projectileSpeed,
+                    moveData.knockback,
+                    moveData.damageStat,
+                    moveData.projectilePenetrates
+                );
+            }
+            else
+            {
+                combatSystem.SpawnProjectile(
+                    moveData.projectilePrefab,
+                    projectileTarget,
+                    moveData.projectileSpeed,
+                    moveData.knockback,
+                    moveData.damageStat,
+                    moveData.projectilePenetrates
+                );
+            }
         }
     }
 

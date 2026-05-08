@@ -30,6 +30,15 @@ public class Chest : Interactable
     private bool isOpen = false;
     public bool IsOpen => isOpen;
     private Coroutine animCoroutine;
+    private InstanceZone.InstanceType sourceZoneType = InstanceZone.InstanceType.Combat; // Default to combat
+
+    /// <summary>
+    /// Sets the type of zone this chest was spawned in to determine reward scaling.
+    /// </summary>
+    public void SetSourceZoneType(InstanceZone.InstanceType type)
+    {
+        sourceZoneType = type;
+    }
 
     /// <summary>
     /// Fired when the chest is opened. For future card system integration.
@@ -51,23 +60,32 @@ public class Chest : Interactable
 
     protected override void OnInteract()
     {
-        hasInteracted = true;
-
-        // Play the open animation
-        PlayOpenAnimation();
-
-        // Grant random stat boosts to the player
+        // Grant random stat boosts to the player BEFORE setting hasInteracted
+        // so we don't "burn" the interaction if stats aren't found.
         if (player != null)
         {
+            // Robust search: check object, then children, then parents
             EntityStats playerStats = player.GetComponent<EntityStats>();
+            if (playerStats == null) playerStats = player.GetComponentInChildren<EntityStats>();
+            if (playerStats == null) playerStats = player.GetComponentInParent<EntityStats>();
+
             if (playerStats != null)
             {
+                hasInteracted = true;
+                PlayOpenAnimation();
                 GrantRandomStatBoosts(playerStats);
+                OnChestOpened?.Invoke();
+                Debug.Log($"[Chest] {gameObject.name} successfully granted {statBoostCount} boosts to {player.name}.");
+            }
+            else
+            {
+                Debug.LogError($"[Chest] {gameObject.name} could not find EntityStats on {player.name} or its children!");
             }
         }
-
-        OnChestOpened?.Invoke();
-        Debug.Log("[Chest] Opened! Stat boosts granted.");
+        else
+        {
+            Debug.LogError($"[Interactable] {gameObject.name} has no player reference!");
+        }
     }
 
     /// <summary>
@@ -123,7 +141,7 @@ public class Chest : Interactable
     private void GrantRandomStatBoosts(EntityStats stats)
     {
         // Pool of stats that make sense to boost
-        StatType[] boostableStats = new StatType[]
+        StatType[] allPossibleStats = new StatType[]
         {
             StatType.MaxHealth,
             StatType.MoveSpeed,
@@ -141,19 +159,66 @@ public class Chest : Interactable
             StatType.CritDamage
         };
 
+        System.Collections.Generic.List<StatType> pool = new System.Collections.Generic.List<StatType>();
+
+        // Smart allocation: filter out damage types the player doesn't use
+        foreach (StatType stat in allPossibleStats)
+        {
+            float val = stats.GetStatValue(stat);
+            if ((stat == StatType.SlashAttack || stat == StatType.PierceAttack || stat == StatType.MagicAttack) && val <= 0.1f)
+            {
+                continue; // Skip useless damage stats
+            }
+            pool.Add(stat);
+        }
+
         // Pick 'statBoostCount' random unique stats
-        StatType[] selected = new StatType[statBoostCount];
-        System.Collections.Generic.List<StatType> pool = new System.Collections.Generic.List<StatType>(boostableStats);
+        System.Collections.Generic.List<string> rewardTexts = new System.Collections.Generic.List<string>();
 
         for (int i = 0; i < statBoostCount && pool.Count > 0; i++)
         {
             int index = Random.Range(0, pool.Count);
-            selected[i] = pool[index];
+            StatType chosenStat = pool[index];
             pool.RemoveAt(index);
 
+            // Calculate boost amount based on zone type
+            float currentVal = stats.GetStatValue(chosenStat);
+            
+            // Default 8%, but 10% for Challenge zones
+            float percentBoost = 0.08f;
+            if (sourceZoneType == InstanceZone.InstanceType.Challenge)
+            {
+                percentBoost = 0.10f;
+            }
+            
+            float calculatedBoost = currentVal * percentBoost;
+
+            float boostToApply;
+            if (currentVal >= 10f)
+            {
+                // For larger stats like Health or Damage, round to nearest whole number, minimum 1
+                boostToApply = Mathf.Max(1f, Mathf.Round(calculatedBoost));
+            }
+            else
+            {
+                // For smaller stats like MoveSpeed or small Attributes, round to 1 decimal, minimum 0.1
+                boostToApply = Mathf.Max(0.1f, (float)System.Math.Round(calculatedBoost, 1));
+            }
+
             // Apply the boost permanently (duration = 0 means permanent in EntityStats)
-            stats.AddModifier(selected[i], boostAmount, 0f);
-            Debug.Log($"[Chest] +{boostAmount} {selected[i]}");
+            stats.AddModifier(chosenStat, boostToApply, 0f);
+            
+            // Format for UI (Adds spaces before capital letters)
+            string statName = System.Text.RegularExpressions.Regex.Replace(chosenStat.ToString(), "([a-z])([A-Z])", "$1 $2");
+            rewardTexts.Add($"+{boostToApply} {statName}");
+            
+            Debug.Log($"[Chest] +{boostToApply} {statName} (was {currentVal})");
+        }
+
+        // Send to UI
+        if (UIManager.Instance != null && rewardTexts.Count > 0)
+        {
+            UIManager.Instance.ShowRewardPopup(rewardTexts);
         }
     }
 }

@@ -18,7 +18,11 @@ public class AimController : MonoBehaviour
     public bool showDebugLine = true;
 
     private Camera mainCam;
-    private Plane mathGround; 
+    private Plane mathGround;
+
+    // Cached mouse world position (updated every frame in Player mode)
+    private Vector3 mouseWorldPoint;
+    private bool hasValidMousePoint;
 
     void Start()
     {
@@ -66,13 +70,17 @@ public class AimController : MonoBehaviour
             Vector3 hitPoint = ray.GetPoint(enter);
             hitPoint.y = transform.position.y;
 
+            // Cache the mouse world position for other systems (projectiles, etc.)
+            mouseWorldPoint = hitPoint;
+            hasValidMousePoint = true;
+
             transform.LookAt(hitPoint);
 
             Debug.DrawLine(transform.position, hitPoint, Color.green);
         }
         else
         {
-            Debug.LogWarning("AimController: Math Plane Raycast failed (Mouse might be off screen).");
+            hasValidMousePoint = false;
         }
     }
 
@@ -116,34 +124,60 @@ public class AimController : MonoBehaviour
     //  Public helpers for other scripts
     // ─────────────────────────────────────────────
 
+    /// <summary>Returns the world position the mouse is pointing at (Player mode only). Falls back to a point in front of the transform.</summary>
+    public Vector3 GetMouseWorldPoint()
+    {
+        if (hasValidMousePoint)
+            return mouseWorldPoint;
+        return transform.position + transform.forward * 10f;
+    }
+
     /// <summary>Returns the flat direction towards the current target (Y zeroed).</summary>
     public Vector3 GetDirectionToTarget()
     {
-        if (aimMode == AimMode.Player) return transform.forward; // For player, usually mouse direction
+        if (aimMode == AimMode.Player)
+        {
+            if (hasValidMousePoint)
+            {
+                Vector3 dir = mouseWorldPoint - transform.position;
+                dir.y = 0f;
+                return dir.sqrMagnitude > 0.001f ? dir.normalized : transform.forward;
+            }
+            return transform.forward;
+        }
 
         if (target == null) return transform.forward;
 
-        Vector3 dir = target.position - transform.position;
-        dir.y = 0f;
-        return dir.normalized;
+        Vector3 d = target.position - transform.position;
+        d.y = 0f;
+        return d.normalized;
     }
 
     /// <summary>Returns the flat distance to the current target.</summary>
     public float GetDistanceToTarget()
     {
-        if (aimMode == AimMode.Player) return 0f; // Alternatively track distance to mouse
+        if (aimMode == AimMode.Player)
+        {
+            if (hasValidMousePoint)
+            {
+                Vector3 diff = mouseWorldPoint - transform.position;
+                diff.y = 0f;
+                return diff.magnitude;
+            }
+            return 0f;
+        }
 
         if (target == null) return Mathf.Infinity;
 
-        Vector3 diff = target.position - transform.position;
-        diff.y = 0f;
-        return diff.magnitude;
+        Vector3 d = target.position - transform.position;
+        d.y = 0f;
+        return d.magnitude;
     }
 
     /// <summary>True when the enemy is currently facing within <paramref name="angleTolerance"/> degrees of the target.</summary>
     public bool IsFacingTarget(float angleTolerance = 5f)
     {
-        if (aimMode == AimMode.Player) return true; // Player assumes always facing mouse
+        if (aimMode == AimMode.Player) return true; // Player is always rotated toward mouse
 
         if (target == null) return false;
 

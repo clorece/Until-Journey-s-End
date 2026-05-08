@@ -191,10 +191,22 @@ public class RunManager : MonoBehaviour
     {
         isInRun = false;
         currentFloor = 0;
-        CleanupCurrentInstance();
-        TeleportToZone(hubZone);
-        SetState(RunState.Idle);
-        SpawnHubPortal();
+        
+        System.Action endRunAction = () => {
+            CleanupCurrentInstance();
+            TeleportToZone(hubZone);
+            SetState(RunState.Idle);
+            SpawnHubPortal();
+        };
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.FadeAndCall(endRunAction);
+        }
+        else
+        {
+            endRunAction.Invoke();
+        }
     }
 
     // ─────────────────────────────────────────────
@@ -204,19 +216,31 @@ public class RunManager : MonoBehaviour
     private void StartInstance(InstanceZone zone)
     {
         SetState(RunState.Transitioning);
-        TeleportToZone(zone);
+        
+        System.Action startAction = () => {
+            TeleportToZone(zone);
 
-        switch (zone.zoneType)
+            switch (zone.zoneType)
+            {
+                case InstanceZone.InstanceType.Combat:
+                case InstanceZone.InstanceType.Challenge:
+                    StartCombatInstance(zone);
+                    break;
+                case InstanceZone.InstanceType.Shop:
+                case InstanceZone.InstanceType.Respite:
+                    // Non-combat zones spawn rewards immediately
+                    StartNonCombatInstance(zone);
+                    break;
+            }
+        };
+
+        if (UIManager.Instance != null)
         {
-            case InstanceZone.InstanceType.Combat:
-            case InstanceZone.InstanceType.Challenge:
-                StartCombatInstance(zone);
-                break;
-            case InstanceZone.InstanceType.Shop:
-            case InstanceZone.InstanceType.Respite:
-                // Non-combat zones spawn rewards immediately
-                StartNonCombatInstance(zone);
-                break;
+            UIManager.Instance.FadeAndCall(startAction);
+        }
+        else
+        {
+            startAction.Invoke();
         }
     }
 
@@ -313,6 +337,15 @@ public class RunManager : MonoBehaviour
 
         currentZone = zone;
         player.position = zone.GetPlayerSpawnPosition();
+
+        if (Camera.main != null)
+        {
+            CameraFollow camFollow = Camera.main.GetComponent<CameraFollow>();
+            if (camFollow != null)
+            {
+                camFollow.SnapToTarget();
+            }
+        }
 
         OnZoneChanged?.Invoke(zone);
 

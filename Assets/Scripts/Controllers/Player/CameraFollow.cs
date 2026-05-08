@@ -53,6 +53,27 @@ public class CameraFollow : MonoBehaviour
         transform.rotation = orientationRef.rotation; // lock rotation of camera to the orientation of the player
     }
 
+    /// <summary>
+    /// Snaps the camera immediately to the target position, bypassing SmoothDamp interpolation.
+    /// Useful for teleporting without seeing the camera pan across the world.
+    /// </summary>
+    public void SnapToTarget()
+    {
+        if (playerTarget == null || orientationRef == null) return;
+        
+        Vector3 targetPos = playerTarget.position + pivotOffset;
+        Vector3 viewDirection = orientationRef.forward;
+        Vector3 idealPosition = targetPos - (viewDirection * cameraDistance);
+        
+        float idealXWithLookAhead = idealPosition.x + lookAheadX;
+        
+        Vector3 finalDesiredPosition = new Vector3(idealXWithLookAhead, idealPosition.y, idealPosition.z);
+        
+        transform.position = finalDesiredPosition;
+        transform.rotation = orientationRef.rotation;
+        currentVelocity = Vector3.zero; // Reset velocity
+    }
+
     void OnDrawGizmosSelected()
     {
         if (playerTarget != null)

@@ -39,7 +39,24 @@ public class PlayerMovement : MonoBehaviour
         if (cameraTransform == null && mainCam != null) 
             cameraTransform = mainCam.transform;
 
-        if (orcaAgent != null)
+        if (orcaAgent != null && myStats != null)
+        {
+            myStats.OnStatsChanged += UpdateORCASpeed;
+            UpdateORCASpeed();
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (myStats != null)
+        {
+            myStats.OnStatsChanged -= UpdateORCASpeed;
+        }
+    }
+
+    private void UpdateORCASpeed()
+    {
+        if (orcaAgent != null && myStats != null)
         {
             orcaAgent.maxSpeedOverride = myStats.GetStatValue(StatType.MoveSpeed);
         }

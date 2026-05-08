@@ -38,8 +38,15 @@ public class PortalSpawner : MonoBehaviour
         else if (chestPrefab != null)
         {
             Vector3 chestPos = zone.GetChestPosition();
-            GameObject chest = Instantiate(chestPrefab, chestPos, Quaternion.identity);
-            spawnedObjects.Add(chest);
+            GameObject chestObj = Instantiate(chestPrefab, chestPos, Quaternion.identity);
+            
+            Chest chest = chestObj.GetComponent<Chest>();
+            if (chest != null)
+            {
+                chest.SetSourceZoneType(zone.zoneType);
+            }
+            
+            spawnedObjects.Add(chestObj);
         }
 
         // Spawn 3 portals with unique types, north of center

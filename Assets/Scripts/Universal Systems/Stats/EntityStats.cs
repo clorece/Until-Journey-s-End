@@ -53,6 +53,7 @@ public class EntityStats : MonoBehaviour, IDamageable
     public event System.Action OnHealthChanged;
     public event System.Action<Vector3> OnHit; 
     public event System.Action OnDeath;
+    public event System.Action OnStatsChanged;
 
     void Awake()
     {
@@ -213,6 +214,14 @@ public class EntityStats : MonoBehaviour, IDamageable
     {
         if (!statModifiers.ContainsKey(type)) statModifiers[type] = 0;
         statModifiers[type] += amount;
+        
+        // If we increased max health permanently or temporarily, give the current health boost as well
+        if (type == StatType.MaxHealth && amount > 0)
+        {
+            Heal(amount);
+        }
+
+        OnStatsChanged?.Invoke();
         if (duration > 0) StartCoroutine(RemoveModifierAfterTime(type, amount, duration));
     }
 
@@ -220,6 +229,7 @@ public class EntityStats : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(duration);
         statModifiers[type] -= amount;
+        OnStatsChanged?.Invoke();
     }
 
     private void ApplyKnockback(Vector3 knockbackVector)

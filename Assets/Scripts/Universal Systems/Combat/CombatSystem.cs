@@ -147,6 +147,32 @@ public class CombatSystem : MonoBehaviour
     }
 
     /// <summary>
+    /// Spawns a projectile aimed at a specific world position (no prediction). Used for player mouse-aimed shots.
+    /// </summary>
+    public void SpawnProjectileAtPoint(GameObject prefab, Vector3 worldTarget, float speed, float knockbackForce, StatType damageType, bool penetrates)
+    {
+        if (prefab == null || attackPoint == null) return;
+
+        GameObject projObj = Instantiate(prefab, attackPoint.position, Quaternion.identity);
+        Projectile proj = projObj.GetComponent<Projectile>();
+
+        if (proj == null)
+        {
+            Debug.LogError($"[Combat] Projectile prefab '{prefab.name}' is missing the Projectile component!");
+            Destroy(projObj);
+            return;
+        }
+
+        proj.damage = myStats.CalculateOutgoingDamage(damageType);
+        proj.knockbackForce = knockbackForce;
+        proj.penetrates = penetrates;
+        proj.targetLayers = targetLayers;
+        proj.owner = gameObject;
+
+        proj.Launch(worldTarget, speed);
+    }
+
+    /// <summary>
     /// Predicts where a target will be based on its current velocity and the projectile's travel time.
     /// Checks ORCAAgent (movement system) and Rigidbody for velocity data.
     /// </summary>
