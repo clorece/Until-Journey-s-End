@@ -68,7 +68,11 @@ public class EnemyMovement : MonoBehaviour
     void FixedUpdate()
     {
         if (target == null || myStats == null) return;
-        if (myStats.IsDead) return;
+        if (myStats.IsDead) 
+        {
+            ClampToGround();
+            return;
+        }
         if (myStats.IsKnockedBack) return;
 
         if (!isJumping)

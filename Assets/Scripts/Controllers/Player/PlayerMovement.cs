@@ -76,7 +76,11 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (myStats != null && myStats.IsDead) return;
+        if (myStats != null && myStats.IsDead) 
+        {
+            ClampToGround();
+            return;
+        }
         if (myStats != null && myStats.IsKnockedBack) return;
 
         Vector3 lastPos = transform.position;

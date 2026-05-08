@@ -38,6 +38,18 @@ public class UIManager : MonoBehaviour
     private TMP_Text rewardText;
     private Coroutine rewardCoroutine;
 
+    [Header("Death Screen Settings")]
+    public TMP_FontAsset deathFont;
+    public float deathFadeInDuration = 2f;
+    private Canvas deathCanvas;
+    private CanvasGroup deathCanvasGroup;
+    private UnityEngine.UI.Image deathBackground;
+    private TMP_Text deathTextMain;
+    private TMP_Text deathTextPrompt;
+    private bool isWaitingForDeathInput = false;
+    private System.Action onDeathPromptPressed;
+    private Coroutine deathCoroutine;
+
     private UIState currentState = UIState.Gameplay;
     public UIState CurrentState => currentState;
 
@@ -60,6 +72,7 @@ public class UIManager : MonoBehaviour
         
         SetupFadeCanvas();
         SetupRewardCanvas();
+        SetupDeathCanvas();
     }
 
     private void SetupRewardCanvas()
@@ -143,6 +156,125 @@ public class UIManager : MonoBehaviour
         rewardText.outlineColor = new Color(0f, 0f, 0f, 0f);
     }
 
+    private void SetupDeathCanvas()
+    {
+        GameObject canvasObj = new GameObject("DeathCanvas");
+        canvasObj.transform.SetParent(transform);
+        deathCanvas = canvasObj.AddComponent<Canvas>();
+        deathCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        deathCanvas.sortingOrder = 900; // Above everything except fade
+        
+        deathCanvasGroup = canvasObj.AddComponent<CanvasGroup>();
+        deathCanvasGroup.alpha = 0f;
+        deathCanvasGroup.interactable = false;
+        deathCanvasGroup.blocksRaycasts = true;
+
+        // Background
+        GameObject bgObj = new GameObject("DeathBackground");
+        bgObj.transform.SetParent(canvasObj.transform, false);
+        deathBackground = bgObj.AddComponent<UnityEngine.UI.Image>();
+        deathBackground.color = new Color(0, 0, 0, 0.9f); // Darker background
+        RectTransform bgRect = deathBackground.GetComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.sizeDelta = Vector2.zero;
+        bgRect.anchoredPosition = Vector2.zero;
+
+        // YOU DIED Text
+        GameObject mainTextObj = new GameObject("DeathTextMain");
+        mainTextObj.transform.SetParent(canvasObj.transform, false);
+        deathTextMain = mainTextObj.AddComponent<TextMeshProUGUI>();
+        if (deathFont != null) deathTextMain.font = deathFont;
+        deathTextMain.alignment = TextAlignmentOptions.Center;
+        deathTextMain.fontSize = 120;
+        deathTextMain.color = new Color(0.75f, 0.1f, 0.1f, 0f); // Rich red/maroon
+        deathTextMain.fontStyle = FontStyles.Bold;
+        deathTextMain.text = "YOU DIED";
+        RectTransform mainRect = deathTextMain.GetComponent<RectTransform>();
+        mainRect.anchorMin = new Vector2(0.5f, 0.5f);
+        mainRect.anchorMax = new Vector2(0.5f, 0.5f);
+        mainRect.pivot = new Vector2(0.5f, 0.5f);
+        mainRect.anchoredPosition = new Vector2(0, 50);
+        mainRect.sizeDelta = new Vector2(800, 200);
+
+        // Prompt Text
+        GameObject promptTextObj = new GameObject("DeathTextPrompt");
+        promptTextObj.transform.SetParent(canvasObj.transform, false);
+        deathTextPrompt = promptTextObj.AddComponent<TextMeshProUGUI>();
+        if (deathFont != null) deathTextPrompt.font = deathFont;
+        deathTextPrompt.alignment = TextAlignmentOptions.Center;
+        deathTextPrompt.fontSize = 36;
+        deathTextPrompt.color = new Color(0.7f, 0.7f, 0.7f, 0f); // Gray, starts hidden
+        deathTextPrompt.text = "Press any key to go back to Hub";
+        RectTransform promptRect = deathTextPrompt.GetComponent<RectTransform>();
+        promptRect.anchorMin = new Vector2(0.5f, 0.5f);
+        promptRect.anchorMax = new Vector2(0.5f, 0.5f);
+        promptRect.pivot = new Vector2(0.5f, 0.5f);
+        promptRect.anchoredPosition = new Vector2(0, -80);
+        promptRect.sizeDelta = new Vector2(800, 100);
+
+        deathCanvas.gameObject.SetActive(false);
+    }
+
+    public void ShowDeathScreen(System.Action onKeypressed)
+    {
+        onDeathPromptPressed = onKeypressed;
+        isWaitingForDeathInput = false;
+
+        if (deathCoroutine != null) StopCoroutine(deathCoroutine);
+        deathCoroutine = StartCoroutine(DeathScreenRoutine());
+    }
+
+    private System.Collections.IEnumerator DeathScreenRoutine()
+    {
+        deathCanvas.gameObject.SetActive(true);
+        deathCanvasGroup.alpha = 1f;
+
+        // Reset alphas
+        deathBackground.color = new Color(0, 0, 0, 0f);
+        deathTextMain.color = new Color(0.75f, 0.1f, 0.1f, 0f);
+        deathTextPrompt.color = new Color(0.7f, 0.7f, 0.7f, 0f);
+
+        float elapsed = 0f;
+        float bgFadeDuration = deathFadeInDuration * 0.5f;
+
+        // 1. Fade in background slightly
+        while (elapsed < bgFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float alpha = Mathf.Clamp01(elapsed / bgFadeDuration) * 0.9f;
+            deathBackground.color = new Color(0, 0, 0, alpha);
+            yield return null;
+        }
+
+        // 2. Fade in "YOU DIED"
+        elapsed = 0f;
+        while (elapsed < deathFadeInDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float alpha = Mathf.Clamp01(elapsed / deathFadeInDuration);
+            deathTextMain.color = new Color(0.75f, 0.1f, 0.1f, alpha);
+            yield return null;
+        }
+
+        // Wait a bit for impact
+        yield return new WaitForSecondsRealtime(0.75f);
+
+        // 3. Fade in Prompt
+        elapsed = 0f;
+        float promptFade = 1f;
+        while (elapsed < promptFade)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float alpha = Mathf.Clamp01(elapsed / promptFade);
+            deathTextPrompt.color = new Color(0.7f, 0.7f, 0.7f, alpha);
+            yield return null;
+        }
+
+        // Ready for input
+        isWaitingForDeathInput = true;
+    }
+
     private void SetupFadeCanvas()
     {
         GameObject canvasObj = new GameObject("FadeCanvas");
@@ -224,6 +356,17 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         HandleTabInput();
+
+        if (isWaitingForDeathInput && Input.anyKeyDown)
+        {
+            isWaitingForDeathInput = false;
+            
+            // Hide the death canvas immediately when the teleport fade starts, 
+            // or let it stay until the fade finishes. We will just disable it.
+            deathCanvas.gameObject.SetActive(false);
+            
+            onDeathPromptPressed?.Invoke();
+        }
     }
 
     private void HandleTabInput()

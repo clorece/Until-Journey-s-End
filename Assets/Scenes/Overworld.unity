@@ -3366,6 +3366,8 @@ MonoBehaviour:
   rewardFont: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
   rewardFontSize: 24
   rewardPopupDuration: 2.5
+  deathFont: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  deathFadeInDuration: 2
 --- !u!4 &566127797
 Transform:
   m_ObjectHideFlags: 0
@@ -3989,7 +3991,7 @@ MonoBehaviour:
   enemySpawner: {fileID: 680183595}
   portalSpawner: {fileID: 680183594}
   showDebugLogs: 1
-  debugSkipCombat: 1
+  debugSkipCombat: 0
 --- !u!4 &680183597
 Transform:
   m_ObjectHideFlags: 0
@@ -11642,6 +11644,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 518098279561634534, guid: 46e7eb6161b71f74ca502343ad78f13c, type: 3}
+      propertyPath: baseDefense
+      value: 35
+      objectReference: {fileID: 0}
     - target: {fileID: 2046591924811885028, guid: 46e7eb6161b71f74ca502343ad78f13c, type: 3}
       propertyPath: cameraTransform
       value: 

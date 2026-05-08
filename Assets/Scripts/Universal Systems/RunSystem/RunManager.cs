@@ -178,10 +178,18 @@ public class RunManager : MonoBehaviour
     public void OnPlayerDeath()
     {
         if (showDebugLogs)
-            Debug.Log("[RunManager] Player died! Returning to hub.");
+            Debug.Log("[RunManager] Player died! Showing death screen.");
 
-        CleanupCurrentInstance();
-        EndRun();
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowDeathScreen(() => {
+                EndRun();
+            });
+        }
+        else
+        {
+            EndRun();
+        }
     }
 
     /// <summary>
@@ -194,6 +202,16 @@ public class RunManager : MonoBehaviour
         
         System.Action endRunAction = () => {
             CleanupCurrentInstance();
+            
+            if (player != null)
+            {
+                EntityStats pStats = player.GetComponent<EntityStats>();
+                if (pStats != null)
+                {
+                    pStats.FullReset();
+                }
+            }
+            
             TeleportToZone(hubZone);
             SetState(RunState.Idle);
             SpawnHubPortal();

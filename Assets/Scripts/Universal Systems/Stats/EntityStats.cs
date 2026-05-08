@@ -225,6 +225,28 @@ public class EntityStats : MonoBehaviour, IDamageable
         if (duration > 0) StartCoroutine(RemoveModifierAfterTime(type, amount, duration));
     }
 
+    /// <summary>
+    /// Completely resets all stat modifiers, stops any active timed modifiers/knockbacks, and revives the entity.
+    /// Used when returning to the hub after a death.
+    /// </summary>
+    public void FullReset()
+    {
+        StopAllCoroutines(); // Stops knockbacks and timed modifiers
+        
+        statModifiers.Clear();
+        InitializeModifiers();
+        
+        isDead = false;
+        IsKnockedBack = false;
+        
+        currentHealth = GetStatValue(StatType.MaxHealth);
+        
+        OnStatsChanged?.Invoke();
+        OnHealthChanged?.Invoke();
+        
+        Debug.Log($"[EntityStats] {gameObject.name} fully reset.");
+    }
+
     private System.Collections.IEnumerator RemoveModifierAfterTime(StatType type, float amount, float duration)
     {
         yield return new WaitForSeconds(duration);

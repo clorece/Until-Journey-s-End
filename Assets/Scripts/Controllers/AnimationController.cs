@@ -152,6 +152,13 @@ public class AnimationController : MonoBehaviour
 
     void Update()
     {
+        // Reset local death state if the entity was revived (e.g. after a run reset)
+        if (isDead && myStats != null && !myStats.IsDead)
+        {
+            isDead = false;
+            SetAnimation(idleClip);
+        }
+
         if (isDead)
         {
             PlayOneShotDeathAnimation();
