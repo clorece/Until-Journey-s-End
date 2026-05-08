@@ -9152,6 +9152,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
+      propertyPath: baseSlashAttack
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
+      propertyPath: basePierceAttack
+      value: 47
+      objectReference: {fileID: 0}
+    - target: {fileID: 2961673169028449689, guid: 83bb8cccbc664444a9c99917f37263a5, type: 3}
       propertyPath: immuneToKnockback
       value: 1
       objectReference: {fileID: 0}
