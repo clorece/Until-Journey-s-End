@@ -11646,7 +11646,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 518098279561634534, guid: 46e7eb6161b71f74ca502343ad78f13c, type: 3}
       propertyPath: baseDefense
-      value: 35
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 2046591924811885028, guid: 46e7eb6161b71f74ca502343ad78f13c, type: 3}
       propertyPath: cameraTransform
