@@ -238,27 +238,21 @@ public class UIManager : MonoBehaviour
         float elapsed = 0f;
         float bgFadeDuration = deathFadeInDuration * 0.5f;
 
-        // 1. Fade in background slightly
-        while (elapsed < bgFadeDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float alpha = Mathf.Clamp01(elapsed / bgFadeDuration) * 0.9f;
-            deathBackground.color = new Color(0, 0, 0, alpha);
-            yield return null;
-        }
-
-        // 2. Fade in "YOU DIED"
-        elapsed = 0f;
+        // 1 & 2. Fade in background and "YOU DIED" simultaneously
         while (elapsed < deathFadeInDuration)
         {
             elapsed += Time.unscaledDeltaTime;
-            float alpha = Mathf.Clamp01(elapsed / deathFadeInDuration);
-            deathTextMain.color = new Color(0.75f, 0.1f, 0.1f, alpha);
+            float t = Mathf.Clamp01(elapsed / deathFadeInDuration);
+            float bgT = Mathf.Clamp01(elapsed / bgFadeDuration);
+
+            deathBackground.color = new Color(0, 0, 0, bgT * 0.9f);
+            deathTextMain.color = new Color(0.75f, 0.1f, 0.1f, t);
+            
             yield return null;
         }
 
-        // Wait a bit for impact
-        yield return new WaitForSecondsRealtime(0.75f);
+        // Wait a second for impact
+        yield return new WaitForSecondsRealtime(1.5f);
 
         // 3. Fade in Prompt
         elapsed = 0f;
