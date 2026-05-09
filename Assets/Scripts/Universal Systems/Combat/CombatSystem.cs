@@ -29,8 +29,16 @@ public class CombatSystem : MonoBehaviour
     public void PerformConeAttack(float range, float angle, float knockbackForce, StatType damageType)
     {
         Vector3 origin = attackPoint.position;
-
         Vector3 forwardDir = attackPoint.forward; 
+
+        // Explicitly override with AimController direction to guarantee perfect mouse/target aiming
+        AimController aim = attackPoint.GetComponent<AimController>();
+        if (aim == null) aim = GetComponentInChildren<AimController>();
+        if (aim != null)
+        {
+            forwardDir = aim.GetDirectionToTarget();
+        }
+
 
         Collider[] hits = Physics.OverlapSphere(origin, range, targetLayers);
 
@@ -59,13 +67,23 @@ public class CombatSystem : MonoBehaviour
     public void PerformLineAttack(float length, float width, float knockbackForce, StatType damageType)
     {
         Vector3 origin = attackPoint.position;
-
         Vector3 forwardDir = attackPoint.forward; 
+        Quaternion orientation = attackPoint.rotation; 
+
+        // Explicitly override with AimController direction to guarantee perfect mouse/target aiming
+        AimController aim = attackPoint.GetComponent<AimController>();
+        if (aim == null) aim = GetComponentInChildren<AimController>();
+        if (aim != null)
+        {
+            forwardDir = aim.GetDirectionToTarget();
+            if (forwardDir.sqrMagnitude > 0.001f)
+            {
+                orientation = Quaternion.LookRotation(forwardDir);
+            }
+        }
 
         Vector3 center = origin + (forwardDir * (length / 2));
         Vector3 halfExtents = new Vector3(width / 2, 2f, length / 2);
-        
-        Quaternion orientation = attackPoint.rotation; 
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents, orientation, targetLayers);
 
@@ -225,6 +243,10 @@ public class CombatSystem : MonoBehaviour
             case AttackType.Cone:
                 // Visualize the EXACT aim direction
                 Vector3 forward = attackPoint.forward;
+                AimController aim = attackPoint.GetComponent<AimController>();
+                if (aim == null) aim = GetComponentInChildren<AimController>();
+                if (aim != null) forward = aim.GetDirectionToTarget();
+                
                 
                 Quaternion leftRayRotation = Quaternion.AngleAxis(-debugAngle / 2, Vector3.up);
                 Vector3 leftRayDirection = leftRayRotation * forward;
@@ -252,7 +274,12 @@ public class CombatSystem : MonoBehaviour
 
             case AttackType.Projectile:
                 Gizmos.color = new Color(0f, 1f, 1f, 0.5f);
-                Gizmos.DrawRay(attackPoint.position, attackPoint.forward * debugRange);
+                Vector3 projForward = attackPoint.forward;
+                AimController projAim = attackPoint.GetComponent<AimController>();
+                if (projAim == null) projAim = GetComponentInChildren<AimController>();
+                if (projAim != null) projForward = projAim.GetDirectionToTarget();
+                
+                Gizmos.DrawRay(attackPoint.position, projForward * debugRange);
                 Gizmos.DrawWireSphere(attackPoint.position, 0.3f);
                 break;
         }

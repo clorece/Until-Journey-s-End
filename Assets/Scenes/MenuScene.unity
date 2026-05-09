@@ -1789,6 +1789,7 @@ GameObject:
   m_Component:
   - component: {fileID: 681712360}
   - component: {fileID: 681712359}
+  - component: {fileID: 681712361}
   m_Layer: 0
   m_Name: MainMenuController
   m_TagString: Untagged
@@ -1861,6 +1862,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &681712361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681712358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b431a336fbe47364e840e6433a3e81e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CursorManager
+  defaultCursor: {fileID: 2800000, guid: 0ae80f769d3715a4ebaef19ea625f2a8, type: 3}
+  attackCursor: {fileID: 2800000, guid: 48e30770d2ec1dd429df411ad0cf1499, type: 3}
+  defaultHotSpot: {x: 0, y: 0}
+  attackHotSpot: {x: 16, y: 16}
 --- !u!1 &739668672
 GameObject:
   m_ObjectHideFlags: 0

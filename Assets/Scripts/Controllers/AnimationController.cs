@@ -302,6 +302,10 @@ public class AnimationController : MonoBehaviour
                 float duration = distance / speed;
 
                 Vector3 lungeDir = combatSystem.attackPoint.forward;
+                AimController aim = combatSystem.attackPoint.GetComponent<AimController>();
+                if (aim == null) aim = GetComponentInChildren<AimController>();
+                if (aim != null) lungeDir = aim.GetDirectionToTarget();
+
                 lungeDir.y = 0; 
                 lungeDir.Normalize();
 
