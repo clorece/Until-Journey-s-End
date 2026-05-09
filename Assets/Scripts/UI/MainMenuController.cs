@@ -14,6 +14,7 @@ public class MainMenuController : MonoBehaviour
     [Header("Panels")]
     public GameObject mainPanel;
     public GameObject settingsPanel;
+    public GameObject howToPlayPanel;
 
     [Header("Settings Sliders")]
     public Slider masterVolumeSlider;
@@ -25,6 +26,7 @@ public class MainMenuController : MonoBehaviour
         // Ensure we start on the main panel
         if (mainPanel != null) mainPanel.SetActive(true);
         if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
 
         InitializeSliders();
     }
@@ -76,6 +78,7 @@ public class MainMenuController : MonoBehaviour
     {
         if (mainPanel != null) mainPanel.SetActive(false);
         if (settingsPanel != null) settingsPanel.SetActive(true);
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
     }
 
     public void CloseSettings()
@@ -85,6 +88,19 @@ public class MainMenuController : MonoBehaviour
         
         // Save preferences when leaving the settings menu
         if (SettingsManager.Instance != null) SettingsManager.Instance.SaveSettings();
+    }
+
+    public void OpenHowToPlay()
+    {
+        if (mainPanel != null) mainPanel.SetActive(false);
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(true);
+    }
+
+    public void CloseHowToPlay()
+    {
+        if (mainPanel != null) mainPanel.SetActive(true);
+        if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
     }
 
     public void QuitGame()

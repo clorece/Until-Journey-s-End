@@ -3991,7 +3991,7 @@ MonoBehaviour:
   enemySpawner: {fileID: 680183595}
   portalSpawner: {fileID: 680183594}
   showDebugLogs: 1
-  debugSkipCombat: 0
+  debugSkipCombat: 1
 --- !u!4 &680183597
 Transform:
   m_ObjectHideFlags: 0
