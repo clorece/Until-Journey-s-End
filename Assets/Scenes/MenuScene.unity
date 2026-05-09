@@ -547,16 +547,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 177248069}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.16746031, y: 0.16746031, z: 0.16746031}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 573764281}
+  m_Father: {fileID: 233591329}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -248, y: -48}
+  m_AnchoredPosition: {x: 16.320312, y: 33.174385}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &177248071
@@ -582,11 +582,11 @@ MonoBehaviour:
   m_text: "\u2014 HOW TO PLAY \u2014 : Battle your way through randomized combat
     zones. Watch your Health and Open chests to discover powerful Cards. Equip matching
     decks to unlock powerful Set Bonuses. Find Campfires in Respite zones to restore
-    your health before the next battle. \u2022 PROGRESS: Clear all enemies in a zone
-    to spawn a portal to the next area."
+    your health before the next battle. Clear all enemies in a zone to spawn a portal
+    to the next area."
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -887,8 +887,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Options
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -912,7 +912,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 38.05
+  m_fontSize: 50
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -994,7 +994,9 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10.458, y: 10.458, z: 10.458}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1738087708}
+  - {fileID: 177248070}
   m_Father: {fileID: 2065565969}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -1663,8 +1665,6 @@ RectTransform:
   m_Children:
   - {fileID: 739668673}
   - {fileID: 1152796244}
-  - {fileID: 1738087708}
-  - {fileID: 177248070}
   m_Father: {fileID: 2065565969}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -1809,9 +1809,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
   gameSceneName: Overworld
+  mainMenuSceneName: MainMenu
   isPauseMenu: 0
   fadeScreen: {fileID: 849801573}
   fadeDuration: 1
+  gameplayUIRect: {fileID: 0}
   mainPanel: {fileID: 1121201233}
   settingsPanel: {fileID: 524365639}
   howToPlayPanel: {fileID: 2065565968}
@@ -2471,8 +2473,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2496,7 +2498,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36.1
+  m_fontSize: 47.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3238,8 +3240,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: How To Play
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3263,7 +3265,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30.95
+  m_fontSize: 41.55
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3654,8 +3656,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Exit Game
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3679,7 +3681,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 38.05
+  m_fontSize: 50
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3757,16 +3759,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1738087707}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.16746031, y: 0.16746031, z: 0.16746031}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 573764281}
+  m_Father: {fileID: 233591329}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -460, y: -47}
+  m_AnchoredPosition: {x: -19.181244, y: 33.341835}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1738087709
@@ -3792,8 +3794,8 @@ MonoBehaviour:
   m_text: "\u2014 CONTROLS \u2014 WASD : Move \n\nLeft Click : Attack \n\nDash :
     Left Shift \n\nInteract: F\n\nView Character Stats: Hold TAB"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4079,8 +4081,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Until Journey's End
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
-  m_sharedMaterial: {fileID: -5373382363530752304, guid: 86e6a3a113ef38f40a6013c3c9c3c123, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
+  m_sharedMaterial: {fileID: -8054207185256080552, guid: 3b0878bc473d5864d825c0cc4220d586, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4104,7 +4106,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20.8
+  m_fontSize: 26.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
