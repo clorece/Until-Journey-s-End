@@ -64,6 +64,9 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        // Ignore input and mouse aim while paused
+        if (Time.timeScale < 0.1f) return;
+
         if (myStats != null && myStats.IsDead) return;
         if (myStats != null && myStats.IsKnockedBack) return;
         if (isLunging) return;

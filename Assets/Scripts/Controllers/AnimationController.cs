@@ -152,6 +152,9 @@ public class AnimationController : MonoBehaviour
 
     void Update()
     {
+        // Ignore input and animation updates while paused
+        if (Time.timeScale < 0.1f) return;
+
         // Reset local death state if the entity was revived (e.g. after a run reset)
         if (isDead && myStats != null && !myStats.IsDead)
         {
