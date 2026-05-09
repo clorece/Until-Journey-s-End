@@ -5,7 +5,9 @@ A HD-2D Action Roguelike built in Unity.
 ![Engine](https://img.shields.io/badge/Engine-Unity-lightgrey)
 
 ## Overview
-**Until Journey's End** is a fast-paced, zone-based action roguelike featuring gorgeous HD-2D aesthetics, fluid combat, and persistent run-based progression. Players battle through randomized instance zones, collect powerful cards to form Set Bonuses, and rest at campfires to survive as long as possible.
+The very first playable showcase of **Until Journey's End**, a fast-paced, zone-based action roguelike featuring HD-2D aesthetics inspired by JRPGs like *Octopath Traveler*.
+
+This is a very early build of the game mainly to show off the core mechanics, entity AI, and tech demonstrations. This does not represent the final game in any way.
 
 ## Features
 - **Fluid Combat System:** Mix of melee and ranged attacks, dynamic combo chains, and skill cooldowns.
@@ -13,6 +15,12 @@ A HD-2D Action Roguelike built in Unity.
 - **Card-Based Loot:** Discover chests and earn cards. Equip matching suits to unlock powerful synergistic Set Bonuses.
 - **Advanced Enemy AI:** Utilizing ORCA (Optimal Reciprocal Collision Avoidance) for highly intelligent, predictive enemy movement and swarming behavior.
 - **Dynamic UI:** Fully animated main menu and pause screens with mouse-driven parallax effects, volume settings, and sliding HUD elements.
+
+## Installation & Launch
+1. Go to releases in the right side of the repo and download the .zip file associated with the latest version.
+2. Extract the contents of the .zip file to your desired location.
+3. Double-click the **`Until-Journey-s-End.exe`** application file to launch the game!
+*(Note: If Windows SmartScreen flags the application, click "More info" and then "Run anyway". This happens because the build is an unsigned indie executable).*
 
 ## Saber Controls and Skills
 
