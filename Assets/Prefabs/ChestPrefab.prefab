@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6183245628092238351}
   - component: {fileID: 3120655162939310903}
   - component: {fileID: 1942589579019877133}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ChestPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,3 +115,4 @@ MonoBehaviour:
   framesPerSecond: 8
   statBoostCount: 3
   boostAmount: 5
+  visualRotation: {x: 30, y: 0, z: 0}

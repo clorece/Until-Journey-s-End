@@ -134,6 +134,13 @@ public class AnimationController : MonoBehaviour
         if (combatSystem == null) combatSystem = GetComponentInParent<CombatSystem>();
         if (myStats == null) myStats = GetComponentInParent<EntityStats>();
 
+        // Ensure the sprite and its children match the entity's layer for TAA exclusion.
+        // This allows the PostProcess script to render them in the sharp overlay.
+        if (myStats != null)
+        {
+            PostProcess.SetLayerRecursively(gameObject, myStats.gameObject.layer);
+        }
+
         // find keybinds (only relevant for player-controlled entities)
         if (keybinds == null) keybinds = GetComponentInParent<KeybindManager>();
             

@@ -56,6 +56,10 @@ public class MouseHoverTargeting : MonoBehaviour
 
                     // Setup the outline SpriteRenderer
                     SpriteRenderer outlineSR = outlineObj.AddComponent<SpriteRenderer>();
+                    
+                    // Match the layer of the original sprite to ensure it's on a sharp rendering layer
+                    outlineObj.layer = originalSprite.gameObject.layer;
+                    
                     outlineSR.sprite = originalSprite.sprite;
                     outlineSR.flipX = originalSprite.flipX;
                     outlineSR.flipY = originalSprite.flipY;

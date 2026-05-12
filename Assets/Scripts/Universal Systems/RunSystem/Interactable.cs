@@ -31,6 +31,19 @@ public abstract class Interactable : MonoBehaviour
     {
         FindPlayer();
         EnsureCollider();
+
+        // Environmental sprites (Portals, Chests, etc.) should be sharp.
+        // If they are on a Default layer, we move their visuals to the Entities layer for TAA exclusion.
+        int sharpLayer = gameObject.layer;
+        if (((1 << sharpLayer) & PostProcess.ExclusionLayers) == 0)
+        {
+            sharpLayer = LayerMask.NameToLayer("Entities");
+        }
+
+        if (sharpLayer != -1)
+        {
+            PostProcess.SetLayerRecursively(gameObject, sharpLayer);
+        }
     }
 
     /// <summary>

@@ -65,6 +65,12 @@ public class HealthDisplay : MonoBehaviour
         myStats.OnHealthChanged += UpdateBar;
         myStats.OnStatsChanged += UpdateBar;
  
+        // Ensure the entire world-space Canvas and all its children match the parent entity's layer 
+        // This allows the PostProcess system to find and render them without TAA blur.
+        Canvas canvas = GetComponentInParent<Canvas>();
+        GameObject rootToSet = (canvas != null) ? canvas.gameObject : gameObject;
+        PostProcess.SetLayerRecursively(rootToSet, myStats.gameObject.layer);
+
         UpdateBar();
     }
 

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2520724804041682921}
   - component: {fileID: 684859201242361415}
   - component: {fileID: 6519371964097334787}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CampfirePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149,3 +149,4 @@ MonoBehaviour:
   - {fileID: -941241136, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
   - {fileID: 914560489, guid: 14e6d3bd349ae6a4b986d361c31697a2, type: 3}
   framesPerSecond: 6
+  visualRotation: {x: 30, y: 0, z: 0}

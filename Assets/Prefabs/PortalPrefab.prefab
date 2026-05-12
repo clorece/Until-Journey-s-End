@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1237410022152752059}
   - component: {fileID: 7595580366439275285}
   - component: {fileID: 6060117417196123141}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: PortalPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -119,6 +119,7 @@ MonoBehaviour:
   - {fileID: 1779706357, guid: 6d95385fc247b624abe1c73b961823fe, type: 3}
   - {fileID: -561078275, guid: 6d95385fc247b624abe1c73b961823fe, type: 3}
   framesPerSecond: 8
+  visualRotation: {x: 30, y: 0, z: 0}
   combatIcon: {fileID: -485567650, guid: 6757f5d32f182984f9541e67024ea841, type: 3}
   shopIcon: {fileID: -810763204, guid: 6757f5d32f182984f9541e67024ea841, type: 3}
   respiteIcon: {fileID: 1806756605, guid: 6757f5d32f182984f9541e67024ea841, type: 3}
@@ -133,7 +134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1714794680830354317}
   - component: {fileID: 597100242715127103}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SymbolType
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -52,6 +52,20 @@ public class Projectile : MonoBehaviour
     void Start()
     {
         spawnTime = Time.time;
+
+        // Ensure the projectile and its visuals are on a sharp layer to avoid TAA blur.
+        // If the prefab is on a sharp layer (Entities/Players), propagate that to children.
+        // Otherwise, default to the Entities layer for sharpness.
+        int sharpLayer = gameObject.layer;
+        if (((1 << sharpLayer) & PostProcess.ExclusionLayers) == 0)
+        {
+            sharpLayer = LayerMask.NameToLayer("Entities");
+        }
+        
+        if (sharpLayer != -1)
+        {
+            PostProcess.SetLayerRecursively(gameObject, sharpLayer);
+        }
     }
 
     void Update()
